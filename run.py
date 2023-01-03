@@ -3,19 +3,19 @@ from metaWorldEnv import MetaWorldEnv, MetaWorldEnvM
 import numpy as np
 
 
-def get_single_distribution(max_planning_time, mean, variance):
-    random_index = np.random.randint(1, max_planning_time)
+def get_single_distribution(max_planning_time_, mean, variance):
+    random_index = np.random.randint(1, max_planning_time_)
     x = np.random.normal(loc=mean, scale=variance, size=1000)
     count, bins_count = np.histogram(x, bins=random_index + 1)
     pdf = count / sum(count)
     cdf = np.cumsum(pdf)
-    dist1 = np.zeros(max_planning_time)
+    dist1 = np.zeros(max_planning_time_)
     index = 0
     for i in range(0, random_index):
         dist1[i] = cdf[i]
-    for i in range(random_index, max_planning_time):
+    for i in range(random_index, max_planning_time_):
         dist1[i] = 1.0
-    for i in range(0, max_planning_time):
+    for i in range(0, max_planning_time_):
         if dist1[i] >= 1.0:
             index = i
             break
@@ -34,8 +34,19 @@ def get_distributions(num_of_plans, num_of_actions, max_planning_time, mean, var
     return dist, planning_times
 
 
+def test():
+    env_ = MetaWorldEnvM()
+    mw_ = MetaReasoningWorld(env_)
+    its_, v_, p_, t_ = mw_.do_value_iteration(100)
+    print("Size of State Space ", env_.num_of_states)
+    print("Computation Time in secs ", t_)
+    print("Resultant policy", mw_.get_policy_from_path(p_))
+
+
 if __name__ == "__main__":
-    for t in range(6,7):
+
+    test()
+    for t in range(6, 7):
         ctime = 0.0
         space_size = 0
         samples = 1
@@ -45,15 +56,22 @@ if __name__ == "__main__":
             num_of_plans = 2
             actions_per_plan = 3
             max_planning_time = t
-            total_time = (2 * 3 * max_planning_time) + 2
+            # total_time = (2 * 3 * max_planning_time) + 2  #remove total_time from the formulation
             deadline = (3 * max_planning_time)
             actions = [1, 2]
             dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
+            # DEFAULT_DIST2 = [[[0.05, 0.462, 0.943, 1., 1., 1.],
+            #                   [0.179, 0.863, 1., 1., 1., 1.],
+            #                   [0.044, 0.44, 0.917, 1., 1., 1.]],
+            #
+            #                  [[0.018, 0.149, 0.526, 0.86, 0.992, 1.],
+            #                   [0.022, 0.235, 0.731, 0.968, 1., 1.],
+            #                   [0.012, 0.197, 0.683, 0.977, 1., 1.]]]
+            # DEFAULT_TIMES2 = np.array([[3, 2, 3], [5, 4, 4]])
+            # dist = DEFAULT_DIST2
+            # planning_times = DEFAULT_TIMES2
             print(dist)
             print(planning_times)
-            # DEFAULT_DIST2 = [[[0.203, 0.878, 1.0, 1.0], [0.179, 0.847, 0.88, 0.9], [0.179, 0.847, 0.88, 0.9]],
-            #                  [[0.174, 1.0, 1.0, 1.0], [0.126, 0.735, 1.0, 1.0], [0.179, 0.847, 1.0, 1.0]]]
-            # DEFAULT_TIMES2 = np.array([[2, 5, 5], [1, 2, 2]])
             env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time, dist,
                                planning_times)
             mw = MetaReasoningWorld(env)

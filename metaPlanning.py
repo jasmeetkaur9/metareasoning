@@ -67,7 +67,7 @@ class MetaReasoningWorld:
         policy = []
         state_path = []
 
-        while curr_time <= self.env.deadline:
+        while curr_time < self.env.deadline:
             state_path.append(self.env.get_state_from_id(curr_id))
             curr_state_ls = list(self.env.get_state_from_id(curr_id))
             next_action = pi[curr_id]

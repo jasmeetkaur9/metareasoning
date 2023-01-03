@@ -35,39 +35,6 @@ def get_distributions(num_of_plans, num_of_actions, max_planning_time, mean, var
 
 
 if __name__ == "__main__":
-    # total_time = 20
-    # num_of_plans = 2
-    # actions_per_plan = 1
-    # max_planning_time = 14
-    # deadline = 10
-    # planning_dist = [[[0, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.5, 0.75, 0.75, 0.75, 0.99, 0.99]],
-    #                  [[0, 0.1, 0.2, 0.3, 0.6, 0.8, 0.95, 0.98, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99]]]
-    # planning_times = np.array([[13], [8]])
-    # actions = [1, 2]
-    # env_example1 = MetaWorldEnv(total_time, num_of_plans, actions_per_plan, deadline, actions, max_planning_time,
-    #                             planning_dist,
-    #                             planning_times)
-    #
-    # mw = MetaReasoningWorld(env_example1)
-    # print("1")
-    # v, p, t = mw.do_value_iteration(100)
-    # print("Size of State Space ", env_example1.num_of_states)
-    # print("Computation Time in secs ", t)
-    # print("Resultant policy", mw.get_policy_from_path(p))
-    #
-    # env_example2 = MetaWorldEnvM()
-    # mw = MetaReasoningWorld(env_example2)
-    # print("2")
-    # v, p, t = mw.do_value_iteration(100)
-    # print("Size of State Space ", env_example2.num_of_states)
-    # print("Computation Time in secs ", t)
-    # print("Resultant policy", mw.get_policy_from_path(p))
-
-    # This is the first case I found out where it's important to increase the number of iterations from
-    # 100 to 500. Only then you will notice transition to the third symbolic action.
-    # DEFAULT_DIST3 = [[[0.203, 0.878, 1.0, 1.0], [0.179, 0.847, 0.88, 0.9], [0.179, 0.847, 0.88, 0.9]],
-    #                  [[0.174, 1.0, 1.0, 1.0], [0.126, 0.735, 1.0, 1.0], [0.179, 0.847, 1.0, 1.0]]]
-    # DEFAULT_TIMES3 = np.array([[2, 5, 5], [1, 2, 2]])
     for t in range(4, 11):
         ctime = 0.0
         space_size = 0

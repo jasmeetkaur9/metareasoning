@@ -17,7 +17,7 @@ class MetaWorldEnvM:
         self.total_time = 22
         self.num_of_plans = 3
         self.actions_per_plan = 1
-        self.max_planning_time = 7
+        #self.max_planning_time = 7     #no need to have total_planning time; deadline is sufficient
         self.deadline = 10
         self.planning_dist = [[[0.001, 0.8, 0.95, 0.99, 0.99, 0.99, 0.99]],
                               [[0.001, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99]],
@@ -48,14 +48,14 @@ class MetaWorldEnvM:
             curr_st = tmp.pop()
             curr_st_l = list(curr_st)
             curr_time = curr_st_l[0]
-            if curr_time >= self.total_time:
+            if curr_time > self.deadline:
                 break
 
             log("Current State is")
             log(curr_st)
             log("Current time :---------------")
             log(curr_time)
-            log(self.total_time)
+            log(self.deadline)
 
             for act in self.actions:
                 log("Current Action is")
@@ -246,11 +246,11 @@ DEFAULT_TIMES2 = np.array([[3], [1], [8]])
 
 
 class MetaWorldEnv:
-    def __init__(self, total_time_, num_of_plans_, actions_per_plan_, deadline_, actions_, max_planning_time_,
+    def __init__(self, num_of_plans_, actions_per_plan_, deadline_, actions_, max_planning_time_,
                  planning_dist_=DEFAULT_DIST2,
                  planning_times_=DEFAULT_TIMES2):
 
-        self.total_time = total_time_
+        #self.total_time = total_time_      #no need to have total_time; deadline is sufficient
         self.num_of_plans = num_of_plans_
         self.actions_per_plan = actions_per_plan_
         self.max_planning_time = max_planning_time_
@@ -283,14 +283,14 @@ class MetaWorldEnv:
             curr_st = tmp.pop()
             curr_st_l = list(curr_st)
             curr_time = curr_st_l[0]
-            if (curr_time >= self.total_time):
+            if (curr_time > self.deadline):
                 break
 
             log("Current State is")
             log(curr_st)
             log("Current time :---------------")
             log(curr_time)
-            log(self.total_time)
+            log(self.deadline)
 
             for act in self.actions:
                 log("Current Action is")

@@ -35,7 +35,7 @@ def get_distributions(num_of_plans, num_of_actions, max_planning_time, mean, var
 
 
 if __name__ == "__main__":
-    for t in range(4, 11):
+    for t in range(6,7):
         ctime = 0.0
         space_size = 0
         samples = 1
@@ -54,7 +54,7 @@ if __name__ == "__main__":
             # DEFAULT_DIST2 = [[[0.203, 0.878, 1.0, 1.0], [0.179, 0.847, 0.88, 0.9], [0.179, 0.847, 0.88, 0.9]],
             #                  [[0.174, 1.0, 1.0, 1.0], [0.126, 0.735, 1.0, 1.0], [0.179, 0.847, 1.0, 1.0]]]
             # DEFAULT_TIMES2 = np.array([[2, 5, 5], [1, 2, 2]])
-            env = MetaWorldEnv(total_time, num_of_plans, actions_per_plan, deadline, actions, max_planning_time, dist,
+            env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time, dist,
                                planning_times)
             mw = MetaReasoningWorld(env)
             its, v, p, t = mw.do_value_iteration(100)

@@ -14,8 +14,8 @@ class MetaReasoningWorld:
         max_iter = max_iterations  # Maximum number of iterations
         theta = 0.0001
         n = env.num_of_states
-        Value_Table = np.random.rand(n, 1)
-        # Value_Table = np.zeros((n,1),dtype="float")
+        # Value_Table = np.random.rand(n, 1)
+        Value_Table = np.zeros((n,1),dtype="float")
         reward_table = env.reward
         # print(reward_table)
         gamma = 0.9

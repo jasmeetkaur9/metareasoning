@@ -127,8 +127,7 @@ class MetaWorldEnv:
             curr_time = curr_st_l[0]
             # print("Curr state id : curr state :", curr_st_id,curr_st_l)
             for act in self.actions:
-                for i in range(0, self.num_of_states):
-                    tm[curr_st_id][act - 1][i] = 0.00
+                tm[curr_st_id][act - 1] = 0.00
                 # print("Action ", act)
                 next_st1_l = curr_st_l.copy()
                 next_st2_l = curr_st_l.copy()
@@ -152,7 +151,6 @@ class MetaWorldEnv:
                 pt_invested = next_st1_l[index_pt]
                 t_prob = self.planning_dist[act - 1][last_refined_action][pt_invested]
 
-                log("Succ State-1 added")
                 next_st1_l[index_pt] = next_st1_l[index_pt] + 1  # increase planning time for the first state
                 next_st1 = tuple(next_st1_l)  # convert it into a tuple for the states list
                 assert (next_st1_l[0] == curr_st_l[0] + 1)
@@ -213,7 +211,6 @@ class MetaWorldEnv:
 
                         tmp.add(next_st2)  # append to the tmp list for loop
                         log(next_st2)
-
                 if abs(sum(tm[curr_st_id][act - 1]) - 0.0) < 0.001:
                     tm[curr_st_id][act - 1][curr_st_id] = 1.0
                 if self.is_terminal(curr_st_id) and abs(sum(tm[curr_st_id][act - 1]) - 0.0) < 0.001:
@@ -240,7 +237,7 @@ class MetaWorldEnv:
         #     ns.append(i)
         #     prob.append(res[i])
         prob = list(self.transition_model[st_id][action-1])
-        ns = [ i for i in range(0, self.num_of_states)]
+        ns = [i for i in range(0, self.num_of_states)]
         res = dict(zip(ns,prob))
         return res, ns, prob
 

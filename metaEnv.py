@@ -12,6 +12,7 @@ import operator
 import mdptoolbox
 
 DEBUG = False
+random.seed(40)
 
 
 def log(s):
@@ -19,22 +20,47 @@ def log(s):
         print(s)
 
 
-MAX_STATES = 10000
+MAX_STATES = 20000
+num = 2
+tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 
-tm = np.zeros((MAX_STATES, 2, MAX_STATES), dtype="float")
+# DEFAULT_DIST2 = [[[0.05, 0.462, 0.943, 1., 1., 1., 1., 1., 1., 1., 1., 1.],
+#                   [0.179, 0.863, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.],
+#                   [0.044, 0.917, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]],
+#
+#                  [[0.018, 0.149, 0.526, 0.86, 0.992, 1., 1., 1., 1., 1., 1., 1.],
+#                   [0.022, 0.235, 0.731, 0.968, 1., 1., 1., 1., 1., 1., 1., 1.],
+#                   [0.012, 0.197, 0.683, 0.977, 1., 1., 1., 1., 1., 1., 1., 1.]]]
+#
+# DEFAULT_TIMES2 = np.array([[3, 2, 2], [5, 4, 4]])
+# DEFAULT_EDIST = [[[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]],
+#                  [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]]
+# DEFAULT_ETIMES = np.array([[1, 1, 1], [1, 1, 1]])
 
-DEFAULT_DIST2 = [[[0.05, 0.462, 0.943, 1., 1., 1., 1., 1., 1., 1., 1., 1.],
-                  [0.179, 0.863, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.],
-                  [0.044, 0.917, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]],
 
-                 [[0.018, 0.149, 0.526, 0.86, 0.992, 1., 1., 1., 1., 1., 1., 1.],
-                  [0.022, 0.235, 0.731, 0.968, 1., 1., 1., 1., 1., 1., 1., 1.],
-                  [0.012, 0.197, 0.683, 0.977, 1., 1., 1., 1., 1., 1., 1., 1.]]]
+# DEFAULT_DIST2 = [[[0.041, 0.387, 0.891, 1., 1., 1., 1.],
+#                               [0.52, 1., 1., 1., 1., 1., 1.]],
+#
+#                              [[0.078, 0.517, 0.94, 1., 1., 1., 1.],
+#                               [0.065, 0.513, 0.953, 1., 1., 1., 1.]]]
+# DEFAULT_TIMES2 = [[3, 1],
+#                   [3, 3]]
+#
+# DEFAULT_EDIST = [[[0.5, 0.5], [0.5, 0.5]],
+#                  [[0.5, 0.5], [0.5, 0.5]]]
+# DEFAULT_ETIMES = np.array([[1, 1], [1, 1]])
 
-DEFAULT_TIMES2 = np.array([[3, 2, 2], [5, 4, 4]])
-DEFAULT_EDIST = [[[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]],
-                 [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]]]
-DEFAULT_ETIMES = np.array([[1, 1, 1], [1, 1, 1]])
+DEFAULT_DIST2 = [[[0.036, 0.247, 0.648, 0.94, 0.997, 1., 1., 1., 1.],
+                  [0.394, 1., 1., 1., 1., 1., 1., 1., 1.]],
+
+                 [[0.015, 0.345, 0.909, 1., 1., 1., 1., 1., 1.],
+                  [0.047, 0.719, 1., 1., 1., 1., 1., 1., 1.]]]
+DEFAULT_TIMES2 = [[5, 1],
+                  [3, 2]]
+
+DEFAULT_EDIST = [[[0.5, 0.5], [0.5, 0.5]],
+                 [[0.5, 0.5], [0.5, 0.5]]]
+DEFAULT_ETIMES = np.array([[1, 1], [1, 1]])
 
 
 class MetaWorldEnv:
@@ -65,6 +91,7 @@ class MetaWorldEnv:
         self.reward = self.get_reward_table()
         self.reward_model = self.get_reward_model()
         self.isStochasticR, self.isStochasticN, self.isStochasticS = self.is_stochastic()
+        self.terminal_state = self.set_terminal()
 
     def add_state(self, s):
         if s not in self.state_space:
@@ -87,16 +114,13 @@ class MetaWorldEnv:
     def get_state_space(self):
         shape_of_tuple = 1 + 3 * self.num_of_plans
         start = tuple([0] * shape_of_tuple)
-
         self.add_state(start)
         tmp = set()
         tmp.add(start)
         curr_time = 0
-
         while True:
             if len(tmp) <= 0:
                 break
-
             curr_st = tmp.pop()
             curr_st_id = self.get_state_id(curr_st)
             curr_st_l = list(curr_st)
@@ -195,6 +219,7 @@ class MetaWorldEnv:
                 if self.is_terminal(curr_st_id) and abs(sum(tm[curr_st_id][act - 1]) - 0.0) < 0.001:
                     tm[curr_st_id][act - 1][curr_st_id] = 1.0
 
+    # this is very slow so need to come up with a better way
     def get_transition_model(self):
         n = self.num_of_states
         tm_tmp = np.zeros((n, self.num_of_plans, n), dtype="float")
@@ -210,11 +235,33 @@ class MetaWorldEnv:
         res = {}
         ns = []
         prob = []
-        for i in range(0, self.num_of_states):
-            res[i] = self.transition_model[st_id][action - 1][i]
-            ns.append(i)
-            prob.append(res[i])
+        # for i in range(0, self.num_of_states):
+        #     res[i] = self.transition_model[st_id][action - 1][i]
+        #     ns.append(i)
+        #     prob.append(res[i])
+        prob = list(self.transition_model[st_id][action-1])
+        ns = [ i for i in range(0, self.num_of_states)]
+        res = dict(zip(ns,prob))
         return res, ns, prob
+
+    def step2(self, st_id, action):
+        assert (action in self.actions)
+        assert (st_id in range(0, self.num_of_states))
+        res = {}
+        ns = []
+        prob = []
+        reward = self.reward_model[st_id]
+        # for i in range(0, self.num_of_states):
+        #     res[i] = self.transition_model[st_id][action - 1][i]
+        #     ns.append(i)
+        #     prob.append(res[i])
+        prob = list(self.transition_model[st_id][action - 1])
+        ns = [i for i in range(0, self.num_of_states)]
+        res = dict(zip(ns, prob))
+        list1 = list(res.keys())
+        list2 = list(res.values())
+        curr_id = (random.choices(list1, weights=list2, k=1))[0]
+        return curr_id, reward
 
     def get_id_from_state(self, st):
         key = {i for i in self.state_id_map if self.state_id_map[i] == st}
@@ -238,9 +285,31 @@ class MetaWorldEnv:
             last_action_id = self.actions_per_plan - 1
             if curr_time > self.deadline:
                 return True
-            elif curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
+            elif exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
                 return True
         return False
+
+    def set_terminal(self):
+        arr = [False for i in range(0, self.num_of_states)]
+        for i in range(0, self.num_of_states):
+            state = self.get_state_from_id(i)
+            state_l = list(state)
+            for j in range(1, self.num_of_plans + 1):
+                plan_id = j - 1
+                last_refined_action = state_l[3 * j - 2]
+                pt_invested = state_l[3 * j - 1]
+                exec_time = state_l[3 * j]
+                curr_time = state_l[0]
+                last_action_id = self.actions_per_plan - 1
+                if curr_time > self.deadline:
+                    arr[i] = True
+                elif exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
+                    arr[i] = True
+
+        return arr
+
+    def done(self, st_id):
+        return self.terminal_state[st_id]
 
     def get_reward_table(self):
         reward = {}
@@ -258,8 +327,8 @@ class MetaWorldEnv:
                 t_prob = self.planning_dist[plan_id][last_action_id][pt_invested]
                 curr_time = state_l[0]
 
-                if curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
-                    r = r + 1.0
+                if exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
+                    r = 100.0
             reward[i] = r
         return reward
 
@@ -276,3 +345,6 @@ class MetaWorldEnv:
                 if abs(sum(self.transition_model[i][j]) - 1.0) > 0.001:
                     return i, j, sum(self.transition_model[i][j])
         return 0, 0, 1.0
+
+    def get_action_from_action_index(self, action_index):
+        return self.actions[action_index]

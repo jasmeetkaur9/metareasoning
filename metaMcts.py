@@ -1,6 +1,6 @@
 from __future__ import division
 import random
-
+from metaEnv import MetaWorldEnv
 
 class Action():
     def __init__(self, player, x):
@@ -65,8 +65,7 @@ class State:
 
             t_prob = self.env.planning_dist[plan_id][last_action_id][pt_invested]
             curr_time = state_l[0]
-
             if curr_time + exec_time <= self.env.deadline and last_refined_action == last_action_id:
-                r = r + 1.0
+                r = 1.0
 
         return r

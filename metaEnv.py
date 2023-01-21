@@ -1,6 +1,5 @@
 from __future__ import division
 from copy import deepcopy
-from mcts import mcts
 from functools import reduce
 import numpy as np
 from itertools import count
@@ -50,14 +49,20 @@ tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 #                  [[0.5, 0.5], [0.5, 0.5]]]
 # DEFAULT_ETIMES = np.array([[1, 1], [1, 1]])
 
-DEFAULT_DIST2 = [[[0.036, 0.247, 0.648, 0.94, 0.997, 1., 1., 1., 1.],
-                  [0.394, 1., 1., 1., 1., 1., 1., 1., 1.]],
+# DEFAULT_DIST2 = [[[0.036, 0.247, 0.648, 0.94, 0.997, 1., 1., 1., 1.],
+#                   [0.394, 1., 1., 1., 1., 1., 1., 1., 1.]],
+#
+#                  [[0.015, 0.345, 0.909, 1., 1., 1., 1., 1., 1.],
+#                   [0.047, 0.719, 1., 1., 1., 1., 1., 1., 1.]]]
+# DEFAULT_TIMES2 = [[5, 1],
+#                   [3, 2]]
+DEFAULT_DIST2 = [[[0.036, 0.67, 1., 1., 1.],
+                  [0.394, 1., 1., 1.,1.]],
 
-                 [[0.015, 0.345, 0.909, 1., 1., 1., 1., 1., 1.],
-                  [0.047, 0.719, 1., 1., 1., 1., 1., 1., 1.]]]
-DEFAULT_TIMES2 = [[5, 1],
+                 [[0.015, 0.345, 0.909, 1., 1.],
+                  [0.047, 0.719, 1., 1., 1.]]]
+DEFAULT_TIMES2 = [[2, 1],
                   [3, 2]]
-
 DEFAULT_EDIST = [[[0.5, 0.5], [0.5, 0.5]],
                  [[0.5, 0.5], [0.5, 0.5]]]
 DEFAULT_ETIMES = np.array([[1, 1], [1, 1]])

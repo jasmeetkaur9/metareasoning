@@ -1,6 +1,5 @@
 from __future__ import division
 from copy import deepcopy
-from mcts import mcts
 from functools import reduce
 import numpy as np
 from itertools import count

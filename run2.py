@@ -1,6 +1,5 @@
 from __future__ import division
 from copy import deepcopy
-from mcts import mcts
 from functools import reduce
 import numpy as np
 from itertools import count
@@ -10,7 +9,6 @@ import time
 import random
 import operator
 import mdptoolbox
-from metaEnvTest import MetaWorldEnvM
 from metaPlan import MetaReasoningWorld
 from metaEnv import MetaWorldEnv
 from metaMcts import Action, State
@@ -74,7 +72,7 @@ if __name__ == "__main__":
             actions_per_plan = 2
             max_planning_time = 6
             # total_time = (2 * 3 * max_planning_time) + 2  #remove total_time from the formulation
-            deadline = 7
+            deadline = 3
             actions = [1, 2]
             dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
             # DEFAULT_DIST2 = [[[0.041, 0.387, 0.891, 1., 1., 1., 1.],
@@ -121,10 +119,11 @@ if __name__ == "__main__":
             # print("Resultant policy", mw.get_policy_from_path(p))
             cost1 = 0.0
             ctime1 = 0.0
-            for ss in range(0, 10):
+            for ss in range(0, 100):
                 pp, _, solution_cost = mw.get_policy_from_path(p)
                 cost1 = cost1 + solution_cost
-            cost1 = cost1 / 10
+                print(solution_cost)
+            cost1 = cost1 / 100
             ctime1 = ctime1 + t1
 
             print("Value Iteration : ", cost1, ctime1)

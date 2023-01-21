@@ -44,12 +44,20 @@ tm = np.zeros((MAX_STATES, 2, MAX_STATES), dtype="float")
 # DEFAULT_TIMES2 = [[3, 1],
 #                   [3, 3]]
 
-DEFAULT_DIST2 = [[[0.036, 0.247, 0.648, 0.94, 0.997, 1., 1., 1., 1.],
-                  [0.394, 1., 1., 1., 1., 1., 1., 1., 1.]],
+# DEFAULT_DIST2 = [[[0.036, 0.247, 0.648, 0.94, 0.997, 1., 1., 1., 1.],
+#                   [0.394, 1., 1., 1., 1., 1., 1., 1., 1.]],
+#
+#                  [[0.015, 0.345, 0.909, 1., 1., 1., 1., 1., 1.],
+#                   [0.047, 0.719, 1., 1., 1., 1., 1., 1., 1.]]]
+# DEFAULT_TIMES2 = [[5, 1],
+#                   [3, 2]]
 
-                 [[0.015, 0.345, 0.909, 1., 1., 1., 1., 1., 1.],
-                  [0.047, 0.719, 1., 1., 1., 1., 1., 1., 1.]]]
-DEFAULT_TIMES2 = [[5, 1],
+DEFAULT_DIST2 = [[[0.036, 0.67, 1., 1., 1.],
+                  [0.394, 1., 1., 1.,1.]],
+
+                 [[0.015, 0.345, 0.909, 1., 1.],
+                  [0.047, 0.719, 1., 1., 1.]]]
+DEFAULT_TIMES2 = [[2, 1],
                   [3, 2]]
 
 DEFAULT_EDIST = [[[0.5, 0.5], [0.5, 0.5]],
@@ -341,11 +349,12 @@ class MetaWorldEnv:
         return self.actions[action_index]
 
 
-t_ = 5
-m = [5, 10]
-v = [2, 1]
-num_of_plans = 2
-actions_per_plan = 2
-max_planning_time = 4
-deadline = 5
-actions = [1, 2]
+# t_ = 5
+# m = [5, 10]
+# v = [2, 1]
+# num_of_plans = 2
+# actions_per_plan = 2
+# max_planning_time = 4
+# deadline = 5
+# actions = [1, 2]
+# env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time)

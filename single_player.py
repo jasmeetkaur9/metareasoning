@@ -4,7 +4,7 @@ import random
 import os
 # Import your game implementation here.
 from env_file import MetaWorldEnv
-
+from matplotlib import pyplot as plt
 episodes = 1
 rewards = []
 moving_average = []
@@ -13,28 +13,19 @@ reward_e = 0
 num_of_plans = 2
 actions_per_plan = 2
 max_planning_time = 6
-deadline = 7
+deadline = 3
 actions = [1, 2]
 env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time)
 game = env
 print("done initializing the env")
-
+random.seed(40)
 
 class MCTS:
 
-    # -----------------------------------------------------------------------#
-    # Description: Constructor.
-    # Node 	  - Root node of the tree of class Node.
-    # Verbose - True: Print details of search during execution.
-    # 			False: Otherwise
-    # -----------------------------------------------------------------------#
     def __init__(self, Node, Verbose=False):
         self.root = Node
         self.verbose = Verbose
 
-    # -----------------------------------------------------------------------#
-    # Description: Performs selection phase of the MCTS.
-    # -----------------------------------------------------------------------#
     def Selection(self):
         SelectedChild = self.root
         HasChild = False
@@ -76,8 +67,8 @@ class MCTS:
 
         MaxWeight = 0.0
         for Child in Node.children:
-            # Weight = self.EvalUTC(Child)
-            Weight = Child.sputc
+            Weight = self.EvalUTC(Child)
+            # Weight = Child.sputc
             if (self.verbose):
                 print("Considered child:", game.get_state_from_id(Child.state), "UTC:", Weight)
             if (Weight > MaxWeight):
@@ -85,13 +76,9 @@ class MCTS:
                 SelectedChild = Child
         return SelectedChild
 
-    # -----------------------------------------------------------------------#
-    # Description: Performs expansion phase of the MCTS.
-    # Leaf	- Leaf Node to expand.
-    # -----------------------------------------------------------------------#
     def Expansion(self, Leaf):
         if (self.IsTerminal((Leaf))):
-            print("Is Terminal.")
+            #print("Is Terminal.")
             return False
         elif (Leaf.visits == 0):
             return Leaf
@@ -110,10 +97,6 @@ class MCTS:
             print("Expanded: ", game.get_state_from_id(Child.state))
         return Child
 
-    # -----------------------------------------------------------------------#
-    # Description: Checks if a Node is terminal (it has no more children).
-    # Node	- Node to check.
-    # -----------------------------------------------------------------------#
     def IsTerminal(self, Node):
         # Evaluate if node is terminal.
         if (game.done(Node.state)):
@@ -165,7 +148,7 @@ class MCTS:
         Level = self.GetLevel(Node)
         Result = 0
         # Perform simulation.
-        while (not (game.done(CurrentState))):
+        while True:
             action = random.choice(game.actions)
             CurrentState, reward = game.step2(CurrentState,action)
             Level += 1.0
@@ -173,7 +156,11 @@ class MCTS:
             if (self.verbose):
                 print("CurrentState:", game.get_state_from_id(CurrentState))
                 #game.PrintTablesScores(CurrentState)
-
+            if game.done(CurrentState) :
+                CurrentState, reward = game.step2(CurrentState, action)
+                Level += 1.0
+                Result = Result + reward
+                break
         return Result
 
     # -----------------------------------------------------------------------#
@@ -222,7 +209,7 @@ class MCTS:
     # -----------------------------------------------------------------------#
     def EvalUTC(self, Node):
         # c = np.sqrt(2)
-        c = 0.5
+        c = 1.41
         w = Node.wins
         n = Node.visits
         sumsq = Node.ressq
@@ -233,7 +220,8 @@ class MCTS:
 
         UTC = w / n + c * np.sqrt(np.log(t) / n)
         D = 10000.
-        Modification = np.sqrt((sumsq - n * (w / n) ** 2 + D) / n)
+        Modification = 0.0
+        #Modification = np.sqrt((sumsq - n * (w / n) ** 2 + D) / n)
         # print "Original", UTC
         # print "Mod", Modification
         Node.sputc = UTC + Modification
@@ -305,27 +293,37 @@ class MCTS:
     # -----------------------------------------------------------------------#
     def Run(self, MaxIter=5000):
         for i in range(MaxIter):
-            if (self.verbose):
+            if self.verbose:
                 print("\n===== Begin iteration:", i, "=====")
             X = self.Selection()
+            #print("State is : ", game.get_state_from_id(X.state))
             Y = self.Expansion(X)
             if (Y):
                 Result = self.Simulation(Y)
-                if (self.verbose):
-                    print("Result: ", Result)
+                #print("Result: ", Result)
                 self.Backpropagation(Y, Result)
             else:
-                Result = game.reward_model(X.state)
-                if (self.verbose):
-                    print("Result: ", Result)
+                Result = game.reward_model[X.state]
+                #print("Result: ", Result)
                 self.Backpropagation(X, Result)
-            self.PrintResult(Result)
+            #print(Result)
+            #self.PrintResult(Result)
 
-        print("Search complete.")
-        print("Iterations:", i)
+        # print("Search complete.")
+        # print("Iterations:", i)
 
+l = []
+moving_average = []
+for k in range (1, 2000):
+    cost = 0.0
+    for i in range(1,10):
+        n = nd.Node(0)
+        mcts = MCTS(n, False)
+        #print("Running the MCTS")
+        mcts.Run(k)
+        cost = cost + n.sputc
+    l.append(cost/10)
+    moving_average.append(np.mean(l))
+plt.plot(moving_average)
+plt.show()
 
-n = nd.Node(0)
-mcts = MCTS(n, True)
-print("Running the MCTS")
-mcts.Run(10)

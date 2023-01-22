@@ -15,16 +15,17 @@ actions_per_plan = 2
 max_planning_time = 6
 deadline = 3
 actions = [1, 2]
-env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time)
-game = env
-print("done initializing the env")
-random.seed(40)
+#env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time)
+#game = env
+#print("done initializing the env")
+#random.seed(40)
 
 class MCTS:
 
-    def __init__(self, Node, Verbose=False):
+    def __init__(self, Node, env, Verbose=False):
         self.root = Node
         self.verbose = Verbose
+        self.game = env
 
     def Selection(self):
         SelectedChild = self.root
@@ -43,7 +44,7 @@ class MCTS:
         # SelectedChild.visits += 1.0
 
         if (self.verbose):
-            print("\nSelected: ", game.get_state_from_id(SelectedChild.state))
+            print("\nSelected: ", self.game.get_state_from_id(SelectedChild.state))
 
         return SelectedChild
 
@@ -62,7 +63,7 @@ class MCTS:
                 continue
             else:
                 if (self.verbose):
-                    print("Considered child", game.get_state_from_id(Child.state), "UTC: inf")
+                    print("Considered child", self.game.get_state_from_id(Child.state), "UTC: inf")
                 return Child
 
         MaxWeight = 0.0
@@ -70,7 +71,7 @@ class MCTS:
             Weight = self.EvalUTC(Child)
             # Weight = Child.sputc
             if (self.verbose):
-                print("Considered child:", game.get_state_from_id(Child.state), "UTC:", Weight)
+                print("Considered child:", self.game.get_state_from_id(Child.state), "UTC:", Weight)
             if (Weight > MaxWeight):
                 MaxWeight = Weight
                 SelectedChild = Child
@@ -94,12 +95,12 @@ class MCTS:
             Child = self.SelectChildNode(Leaf)
 
         if (self.verbose):
-            print("Expanded: ", game.get_state_from_id(Child.state))
+            print("Expanded: ", self.game.get_state_from_id(Child.state))
         return Child
 
     def IsTerminal(self, Node):
         # Evaluate if node is terminal.
-        if (game.done(Node.state)):
+        if (self.game.done(Node.state)):
             return True
         else:
             return False
@@ -114,9 +115,9 @@ class MCTS:
     # -----------------------------------------------------------------------#
     def EvalChildren(self, Node):
         Children = []
-        for action in range(game.num_of_actions):
-            next_state, reward = game.step2(Node.state, game.get_action_from_action_index(action))
-            done = game.done(next_state)
+        for action in range(self.game.num_of_actions):
+            next_state, reward = self.game.step2(Node.state, self.game.get_action_from_action_index(action))
+            done = self.game.done(next_state)
             ChildNode = nd.Node(next_state)
             Children.append(ChildNode)
         return Children
@@ -149,15 +150,15 @@ class MCTS:
         Result = 0
         # Perform simulation.
         while True:
-            action = random.choice(game.actions)
-            CurrentState, reward = game.step2(CurrentState,action)
+            action = random.choice(self.game.actions)
+            CurrentState, reward = self.game.step2(CurrentState,action)
             Level += 1.0
             Result = Result + reward
             if (self.verbose):
-                print("CurrentState:", game.get_state_from_id(CurrentState))
+                print("CurrentState:", self.game.get_state_from_id(CurrentState))
                 #game.PrintTablesScores(CurrentState)
-            if game.done(CurrentState) :
-                CurrentState, reward = game.step2(CurrentState, action)
+            if self.game.done(CurrentState) :
+                CurrentState, reward = self.game.step2(CurrentState, action)
                 Level += 1.0
                 Result = Result + reward
                 break
@@ -268,7 +269,7 @@ class MCTS:
         string = str(self.GetLevel(Node)) + ") (["
         # for i in Node.state.bins: # game specific (scrap)
         # 	string += str(i) + ", "
-        string += str(game.get_state_from_id(Node.state))
+        string += str(self.game.get_state_from_id(Node.state))
         string += "], W: " + str(Node.wins) + ", N: " + str(Node.visits) + ", UTC: " + str(Node.sputc) + ") \n"
         file.write(string)
 
@@ -303,7 +304,7 @@ class MCTS:
                 #print("Result: ", Result)
                 self.Backpropagation(Y, Result)
             else:
-                Result = game.reward_model[X.state]
+                Result = self.game.reward_model[X.state]
                 #print("Result: ", Result)
                 self.Backpropagation(X, Result)
             #print(Result)
@@ -312,18 +313,18 @@ class MCTS:
         # print("Search complete.")
         # print("Iterations:", i)
 
-l = []
-moving_average = []
-for k in range (1, 2000):
-    cost = 0.0
-    for i in range(1,10):
-        n = nd.Node(0)
-        mcts = MCTS(n, False)
-        #print("Running the MCTS")
-        mcts.Run(k)
-        cost = cost + n.sputc
-    l.append(cost/10)
-    moving_average.append(np.mean(l))
-plt.plot(moving_average)
-plt.show()
+# l = []
+# moving_average = []
+# for k in range (1, 500):
+#     cost = 0.0
+#     for i in range(1,10):
+#         n = nd.Node(0)
+#         mcts = MCTS(n, env,False)
+#         #print("Running the MCTS")
+#         mcts.Run(k)
+#         cost = cost + n.sputc
+#     l.append(cost/10)
+#     moving_average.append(np.mean(l))
+# plt.plot(moving_average)
+# plt.show()
 

@@ -22,16 +22,21 @@ def log(s):
 MAX_STATES = 20000
 num = 2
 tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
-DEFAULT_DIST2 = [[[0.036, 0.67, 1., 1., 1.],
-                  [0.394, 1., 1., 1.,1.]],
 
-                 [[0.015, 0.345, 0.909, 1., 1.],
-                  [0.047, 0.719, 1., 1., 1.]]]
-DEFAULT_TIMES2 = [[2, 1],
-                  [3, 2]]
-DEFAULT_EDIST = [[[0.5, 0.5], [0.5, 0.5]],
-                 [[0.5, 0.5], [0.5, 0.5]]]
-DEFAULT_ETIMES = np.array([[1, 1], [1, 1]])
+DEFAULT_DIST2 = [[[0.055, 0.472, 0.94,  1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.   ],
+                [0.019, 0.242, 0.765, 0.983, 1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,   1.,   ]],
+                [[0.023, 0.264, 0.762, 0.98,  1.,    1.,    1.,    1.,    1.,    1.,    1.,     1.,    1.,    1.   ],
+                [0.156, 0.933, 1.,    1.,    1.,   1.,    1.,    1.,    1.,    1.,    1.,   1.,    1.,    1.   ]]]
+
+DEFAULT_TIMES2 = [[3, 4],
+                  [4, 2]]
+DEFAULT_EDIST = [[[0.31256755, 0.31286336, 0.3745691 ],
+                [0.25796517, 0.35366353, 0.3883713 ]],
+
+                [[0.31637855, 0.33429033, 0.34933112],
+                [0.28230489, 0.29302489, 0.42467022]]]
+
+DEFAULT_ETIMES = np.array([[2, 2], [2, 2]])
 
 
 class MetaWorldEnv:
@@ -250,10 +255,10 @@ class MetaWorldEnv:
             pt_invested = state_l[3 * j - 1]
             exec_time = state_l[3 * j]
             curr_time = state_l[0]
-            last_action_id = self.actions_per_plan - 1
+            last_action_id = self.actions_per_plan-1
             if curr_time > self.deadline:
                 return True
-            elif exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
+            elif pt_invested > 0 and exec_time >= self.actions_per_plan and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
                 return True
         return False
 
@@ -271,7 +276,7 @@ class MetaWorldEnv:
                 last_action_id = self.actions_per_plan - 1
                 if curr_time > self.deadline:
                     arr[i] = True
-                elif exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
+                elif pt_invested > 0 and exec_time >= self.actions_per_plan and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
                     arr[i] = True
 
         return arr
@@ -295,7 +300,7 @@ class MetaWorldEnv:
                 t_prob = self.planning_dist[plan_id][last_action_id][pt_invested]
                 curr_time = state_l[0]
 
-                if exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
+                if pt_invested > 0 and exec_time >= self.actions_per_plan and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
                     r = 100.0
             reward[i] = r
         return reward

@@ -36,9 +36,9 @@ class MCTS:
             HasChild = True
         else:
             HasChild = False
-
+        BestAction = 1
         while (HasChild):
-            SelectedChild = self.SelectChild(SelectedChild)
+            SelectedChild, BestAction = self.SelectChild(SelectedChild)
             if (len(SelectedChild.children) == 0):
                 HasChild = False
         # SelectedChild.visits += 1.0
@@ -46,7 +46,7 @@ class MCTS:
         if (self.verbose):
             print("\nSelected: ", self.game.get_state_from_id(SelectedChild.state))
 
-        return SelectedChild
+        return SelectedChild,BestAction
 
     # -----------------------------------------------------------------------#
     # Description:
@@ -56,7 +56,7 @@ class MCTS:
     # -----------------------------------------------------------------------#
     def SelectChild(self, Node):
         if (len(Node.children) == 0):
-            return Node
+            return Node,1
 
         for Child in Node.children:
             if (Child.visits > 0.0):
@@ -64,9 +64,11 @@ class MCTS:
             else:
                 if (self.verbose):
                     print("Considered child", self.game.get_state_from_id(Child.state), "UTC: inf")
-                return Child
+                return Child,1
 
         MaxWeight = 0.0
+        best_action = 1
+        index = 0
         for Child in Node.children:
             Weight = self.EvalUTC(Child)
             # Weight = Child.sputc
@@ -75,7 +77,9 @@ class MCTS:
             if (Weight > MaxWeight):
                 MaxWeight = Weight
                 SelectedChild = Child
-        return SelectedChild
+                best_action = index+1
+            index = index + 1
+        return SelectedChild,best_action
 
     def Expansion(self, Leaf):
         if (self.IsTerminal((Leaf))):
@@ -86,7 +90,7 @@ class MCTS:
         else:
             # Expand.
             if (len(Leaf.children) == 0):
-                Children = self.EvalChildren(Leaf)
+                Children= self.EvalChildren(Leaf)
                 for NewChild in Children:
                     if (np.all(NewChild.state == Leaf.state)):
                         continue
@@ -115,6 +119,7 @@ class MCTS:
     # -----------------------------------------------------------------------#
     def EvalChildren(self, Node):
         Children = []
+        Actions = []
         for action in range(self.game.num_of_actions):
             next_state, reward = self.game.step2(Node.state, self.game.get_action_from_action_index(action))
             done = self.game.done(next_state)
@@ -293,10 +298,11 @@ class MCTS:
     # MaxIter	- Maximum iterations to run the search algorithm.
     # -----------------------------------------------------------------------#
     def Run(self, MaxIter=5000):
+        action = 0
         for i in range(MaxIter):
             if self.verbose:
                 print("\n===== Begin iteration:", i, "=====")
-            X = self.Selection()
+            X, action = self.Selection()
             #print("State is : ", game.get_state_from_id(X.state))
             Y = self.Expansion(X)
             if (Y):
@@ -312,7 +318,7 @@ class MCTS:
 
         # print("Search complete.")
         # print("Iterations:", i)
-
+        return action
 # l = []
 # moving_average = []
 # for k in range (1, 500):

@@ -79,17 +79,21 @@ class MetaReasoningWorld:
         policy = []
         state_path = []
         cost = 0.0
-        while t < self.env.deadline:
+        while True:
             state_path.append(self.env.get_state_from_id(curr_id))
             curr_state_ls = list(self.env.get_state_from_id(curr_id))
             cost = cost + self.env.reward_model[curr_id]
             next_action = pi[curr_id]
             policy.append(next_action)
             res, _, _ = self.env.step(curr_id, next_action)
+            if (self.env.done(curr_id)):
+                break
             list1 = list(res.keys())
             list2 = list(res.values())
             curr_id = (random.choices(list1, weights=list2, k=1))[0]
-            t = t + 1
+        policy.pop()
+        print(len(policy))
+        print(len(state_path))
         return policy, state_path, cost
 
     def get_solution_using_policy(self, p):

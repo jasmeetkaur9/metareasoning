@@ -19,22 +19,22 @@ MAX_STATES = 20000
 
 
 def get_single_distribution(max_planning_time_, mean, variance):
-    random_index = np.random.randint(1, max_planning_time_)
     x = np.random.normal(loc=mean, scale=variance, size=1000)
-    count, bins_count = np.histogram(x, bins=random_index + 1)
+    index = random.randint(2, max_planning_time_)
+    count, bins_count = np.histogram(x, index + 1)
     pdf = count / sum(count)
     cdf = np.cumsum(pdf)
     dist1 = np.zeros(max_planning_time_ + 10)
-    index = 0
-    for i in range(0, random_index):
+    index_i = 0
+    for i in range(0, index):
         dist1[i] = cdf[i]
-    for i in range(random_index, max_planning_time_ + 10):
+    for i in range(index, max_planning_time_ + 10):
         dist1[i] = 1.0
-    for i in range(0, max_planning_time_):
+    for i in range(0, max_planning_time_+10):
         if dist1[i] >= 1.0:
-            index = i
+            index_i = i
             break
-    return dist1, index
+    return dist1, index_i
 
 
 def get_distributions(num_of_plans, num_of_actions, max_planning_time, mean, variance):
@@ -48,6 +48,21 @@ def get_distributions(num_of_plans, num_of_actions, max_planning_time, mean, var
 
     return dist, planning_times
 
+def get_execution_distributions(num_of_plans, num_of_actions,max_execution_time):
+    mean = 20
+    scale = 5
+    e_dist = np.zeros((num_of_plans, num_of_actions, max_execution_time), dtype="float")
+    e_planning_times = np.zeros((num_of_plans, num_of_actions), dtype="int")
+    for i in range(0, num_of_plans):
+        for j in range(0, num_of_actions):
+            data = np.random.normal(loc=mean, scale=scale,size=max_execution_time)
+            s = np.array(data)
+            s = s/s.sum()
+            s = np.sort(s)
+            e_dist[i][j] = s
+            e_planning_times[i][j] = max_execution_time-1
+
+    return e_dist,e_planning_times
 
 def test():
     env_ = MetaWorldEnvM()
@@ -63,22 +78,22 @@ if __name__ == "__main__":
     # test()
     for t_ in range(4, 5):
         space_size = 0
-        samples = 100
-        cost_values = np.zeros((1002), dtype="float")
-        ctime = np.zeros((1002), dtype="float")
-        for i in range(0, samples):
+        samples = 1
+        max_iter = 10
+        cost_values = np.zeros((max_iter+2,samples+1), dtype="float")
+        ctime = np.zeros((max_iter+2,samples+1), dtype="float")
+        for sample_num in range(0, samples):
             m = [5, 10, 5]
             v = [2, 1, 3]
             num_of_plans = 2
             actions_per_plan = 2
-            max_planning_time = 6
+            max_planning_time = 5
             # total_time = (2 * 3 * max_planning_time) + 2  #remove total_time from the formulation
-            deadline = 7
+            deadline = 6
             actions = [1, 2]
             dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
-            # print(dist)
-            # print(planning_times)
-            env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time, dist, planning_times)
+            e_dist, e_times = get_execution_distributions(num_of_plans,actions_per_plan,max_execution_time=3)
+            env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time)
             mw = MetaReasoningWorld(env)
 
             # its, v, p, t = mw.do_value_iteration(100)
@@ -103,40 +118,54 @@ if __name__ == "__main__":
             # print("Computation Time in secs ", t)
             # print("Resultant policy", mw.get_policy_from_path(p))
             cost1 = 0.0
-            for ss in range(0, 10):
-                pp, _, solution_cost = mw.get_policy_from_path(p)
+            for i in range(0, 10):
+                pp, state_path, solution_cost = mw.get_policy_from_path(p)
+                print(pp)
+                print(solution_cost)
+                print(state_path)
                 cost1 = cost1 + solution_cost
-            cost1 = cost1 / 10
-            ctime[0] = t1
-            cost_values[0] += cost1
+            cost1 = cost1/10
+            ctime[0][sample_num] = t1
+            cost_values[0][sample_num] = cost1
+            print(cost1)
 
             #Do MCTS
-            l = []
-            l.append(cost1)
-            moving_average = []
-            moving_average.append(np.mean(l))
-            for k in range (1, 1000):
-                cost = 0.0
-                st_time = time.time()
-                for i in range(1,10):
-                    n = nd.Node(0)
-                    mcts = MCTS(n,env,False)
-                    mcts.Run(k)
-                    cost = cost + n.sputc
+            for k in [10,100]:
+                print("k is : ",k)
+                runs = 10
+                for i in range(0, runs):
+                    st_time = time.time()
+                    curr_id = 0
+                    cost = 0.0
+                    pp = []
+                    state_path = []
+                    while True:
+                        cost = cost + env.reward_model[curr_id]
+                        n = nd.Node(curr_id)
+                        mcts = MCTS(n, env, False)
+                        best_action = mcts.Run(k)
+                        pp.append(best_action)
+                        state_path.append(env.get_state_from_id(curr_id))
+                        res, _, _ = env.step(curr_id, best_action)
+                        if (env.done(curr_id)):
+                            break
+                        list1 = list(res.keys())
+                        list2 = list(res.values())
+                        curr_id = (random.choices(list1, weights=list2, k=1))[0]
+                    print(cost)
+                    pp.pop()
+                    print(pp)
+                    print(state_path)
                 t1 = time.time() - st_time
-                t1 = t1/10
-                ctime[k] = t1
-                l.append(cost/10)
-                cost_values[k] += (cost/10)
-                moving_average.append(np.mean(l))
-            # plt.plot(l)
-            # plt.show()
+                ctime[k][sample_num] = t1
+                cost_values[k][sample_num] = cost
+        avg = []
+        std = []
+        # for k in range(0, max_iter+1):
+        #     avg.append(np.mean(cost_values[k]))
+        #     print(avg[k])
+        # for k in range(0, max_iter+1):
+        #     std.append(np.std(cost_values[k]))
+        #     print(std[k])
 
-        cost_values = cost_values/samples
-        #print(list(cost_values))
-        print(cost_values[0],cost_values[10], cost_values[50], cost_values[100], cost_values[500], cost_values[1000])
-        plt.plot(list(cost_values))
-        plt.show()
-        print("Value Iteration : ", cost_values[0], ctime[0])
-        print("State Space ", env.num_of_states)
 

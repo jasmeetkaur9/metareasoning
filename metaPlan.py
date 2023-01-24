@@ -92,8 +92,6 @@ class MetaReasoningWorld:
             list2 = list(res.values())
             curr_id = (random.choices(list1, weights=list2, k=1))[0]
         policy.pop()
-        print(len(policy))
-        print(len(state_path))
         return policy, state_path, cost
 
     def get_solution_using_policy(self, p):

@@ -58,13 +58,16 @@ class MCTS:
         if (len(Node.children) == 0):
             return Node,1
 
+
+        index = 0
         for Child in Node.children:
+            index = index + 1
             if (Child.visits > 0.0):
                 continue
             else:
                 if (self.verbose):
                     print("Considered child", self.game.get_state_from_id(Child.state), "UTC: inf")
-                return Child,1
+                return Child,index
 
         MaxWeight = 0.0
         best_action = 1
@@ -215,7 +218,7 @@ class MCTS:
     # -----------------------------------------------------------------------#
     def EvalUTC(self, Node):
         # c = np.sqrt(2)
-        c = 1.41
+        c = 4
         w = Node.wins
         n = Node.visits
         sumsq = Node.ressq

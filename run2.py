@@ -163,15 +163,15 @@ if __name__ == "__main__":
                     list1 = list(res.keys())
                     list2 = list(res.values())
                     curr_id = (random.choices(list1, weights=list2, k=1))[0]
-                    # pp.pop()
-                    # cost_total = cost_total + cost
-                    # s.append(cost)
-                    # print(pp)
-                # t1 = time.time() - st_time
-                # print(np.mean(s))
-                # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
-                # ctime[k][sample_num] = t1
-                # cost_values[k][sample_num] = np.mean(s)
+                    pp.pop()
+                    cost_total = cost_total + cost
+                    s.append(cost)
+                    print(pp)
+                t1 = time.time() - st_time
+                print(np.mean(s))
+                print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
+                ctime[k][sample_num] = t1
+                cost_values[k][sample_num] = np.mean(s)
         avg = []
         moving_avg = []
         std = []

@@ -6,7 +6,6 @@ import operator
 import mdptoolbox
 from metaPlan import MetaReasoningWorld
 from metaEnv import MetaWorldEnv
-from metaEnvTest import MetaWorldEnvM
 from single_player import MCTS
 import Node as nd
 import matplotlib.pyplot as plt
@@ -66,13 +65,6 @@ def get_execution_distributions(num_of_plans, num_of_actions,max_execution_time)
 
     return e_dist,e_planning_times
 
-def test():
-    env_ = MetaWorldEnvM()
-    mw_ = MetaReasoningWorld(env_)
-    its_, v_, p_, t_ = mw_.do_value_iteration(100)
-    print("Size of State Space ", env_.num_of_states)
-    print("Computation Time in secs ", t_)
-    print("Resultant policy", mw_.get_policy_from_path(p_))
 
 
 if __name__ == "__main__":
@@ -85,7 +77,7 @@ if __name__ == "__main__":
         cost_values = np.zeros((max_iter+2,samples+1), dtype="float")
         ctime = np.zeros((max_iter+2,samples+1), dtype="float")
         for sample_num in range(0, samples):
-            print("SAMPLE : ",sample_num)
+            # print("SAMPLE : ",sample_num)
             m = [5, 10, 5]
             v = [2, 1, 3]
             num_of_plans = 2
@@ -104,6 +96,7 @@ if __name__ == "__main__":
 
             # its, v, p, t = mw.do_value_iteration(100)
             env.print_for_me()
+            print("DO Value Iteration")
             P = env.transition_model
             P = np.swapaxes(P, 0, 1)
             reward_model = np.zeros((env.num_of_states, env.num_of_plans), dtype="float")
@@ -140,7 +133,7 @@ if __name__ == "__main__":
             cost_values[0][sample_num] = np.mean(s)
             print("DO MCTS")
             #Do MCTS
-            for k in [10000]:
+            for k in [10]:
                 runs = 1
                 cost_total = 0.0
                 s = []
@@ -150,26 +143,27 @@ if __name__ == "__main__":
                     pp = []
                     cost = 0.0
                     state_path = []
-                    cost = cost + env.reward_model[curr_id]
-                    n = nd.Node(curr_id)
-                    mcts = MCTS(n, env, False)
-                    best_action = mcts.Run(k)
-                    mcts.getStatesReached()
-                    pp.append(best_action)
-                    state_path.append(env.get_state_from_id(curr_id))
-                    res, _, _ = env.step(curr_id, best_action)
-                    if env.done(curr_id):
-                        break
-                    list1 = list(res.keys())
-                    list2 = list(res.values())
-                    curr_id = (random.choices(list1, weights=list2, k=1))[0]
+                    while True :
+                        print("Finding the best action")
+                        cost = cost + env.reward_model[curr_id]
+                        n = nd.Node(curr_id)
+                        mcts = MCTS(n, env, True)
+                        best_action = mcts.Run(k)
+                        mcts.getStatesReached()
+                        pp.append(best_action)
+                        state_path.append(env.get_state_from_id(curr_id))
+                        res, _, _ = env.step(curr_id, best_action)
+                        if env.done(curr_id):
+                            break
+                        list1 = list(res.keys())
+                        list2 = list(res.values())
+                        curr_id = (random.choices(list1, weights=list2, k=1))[0]
                     pp.pop()
                     cost_total = cost_total + cost
                     s.append(cost)
-                    print(pp)
                 t1 = time.time() - st_time
                 print(np.mean(s))
-                print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
+                # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
                 ctime[k][sample_num] = t1
                 cost_values[k][sample_num] = np.mean(s)
         avg = []

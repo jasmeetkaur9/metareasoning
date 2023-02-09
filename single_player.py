@@ -3,7 +3,6 @@ import numpy as np
 import random
 import os
 # Import your game implementation here.
-from env_file import MetaWorldEnv
 from matplotlib import pyplot as plt
 episodes = 1
 rewards = []
@@ -180,9 +179,9 @@ class MCTS:
                 CurrentState, reward = self.game.step2(CurrentState, action)
                 if reward > 0:
                     self.arr.add((self.game.get_state_from_id(oldState),reward))
-                break
                 Level += 1.0
                 Result = Result + reward
+                break
 
         if (self.verbose):
             print("Value returned :", Result)
@@ -197,6 +196,8 @@ class MCTS:
     # -----------------------------------------------------------------------#
     def Backpropagation(self, Node, Result):
         # Update Node's weight.
+        if self.verbose:
+            print("Back propagating")
         CurrentNode = Node
         CurrentNode.wins += Result
         CurrentNode.ressq += Result ** 2
@@ -204,14 +205,15 @@ class MCTS:
         self.EvalUTC(CurrentNode)
 
         while (self.HasParent(CurrentNode)):
-            # Update parent node's weight.
+            if self.verbose:
+                print("Has parent")
             CurrentNode = CurrentNode.parent
             CurrentNode.wins += Result
             CurrentNode.ressq += Result ** 2
             CurrentNode.visits += 1
             self.EvalUTC(CurrentNode)
             if self.verbose:
-                print("Parent Cosidered : ", self.game.get_state_from_id(CurrentNode.state))
+                print("Parent Considered : ", self.game.get_state_from_id(CurrentNode.state))
 
     # self.root.wins += Result
     # self.root.ressq += Result**2
@@ -264,9 +266,6 @@ class MCTS:
         index = 0
         for Child in Node.children:
             Weight = Child.visits
-            # Weight = Child.sputc
-            if (self.verbose):
-                print("Considered child:", self.game.get_state_from_id(Child.state), "UTC:", Weight)
             if (Weight > MaxWeight):
                 MaxWeight = Weight
                 SelectedChild = Child
@@ -342,12 +341,8 @@ class MCTS:
     # -----------------------------------------------------------------------#
     def Run(self, MaxIter=5000, seed=40):
         action = 0
-        if self.verbose:
-            print("Search for best action")
         while True:
             X, action = self.Selection()
-            if self.verbose:
-                print("node : ", self.game.get_state_from_id(X.state))
             if self.IsTerminal(X):
                 break
             Y = self.Expansion(X)
@@ -359,17 +354,13 @@ class MCTS:
                     self.Backpropagation(Y, Result)
             else:
                 Result = self.game.reward_model[X.state]
-                #print("Result: ", Result)
                 self.Backpropagation(X, Result)
-            #print(Result)
-            #self.PrintResult(Result)
-            break
         if self.verbose:
             print("Search complete.")
         _, BestAction = self.SelectBestAction(self.root)
         if self.verbose:
-            print(BestAction, self.game.get_state_from_id(self.root.state))
-            print("Root node : " , self.game.get_state_from_id(self.root.state))
+            print("Best Action :" ,BestAction,"For node :", self.game.get_state_from_id(self.root.state))
+            # print("Root node : " , self.game.get_state_from_id(self.root.state))
         return BestAction
 
 

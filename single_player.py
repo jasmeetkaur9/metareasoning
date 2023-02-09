@@ -24,8 +24,10 @@ class MCTS:
 
     def __init__(self, Node, env, Verbose=False):
         self.root = Node
+        self.main = Node
         self.verbose = Verbose
         self.game = env
+        self.arr = set()
 
     def Selection(self):
         SelectedChild = self.root
@@ -60,14 +62,22 @@ class MCTS:
 
 
         index = 0
+        random_child_unvisited = []
+        choose_r = False
         for Child in Node.children:
             index = index + 1
             if (Child.visits > 0.0):
                 continue
             else:
-                if (self.verbose):
-                    print("Considered child", self.game.get_state_from_id(Child.state), "UTC: inf")
-                return Child,index
+                random_child_unvisited.append((Child,index))
+                choose_r = True
+        if choose_r:
+            Len = len(random_child_unvisited)
+            i = np.random.randint(0, Len)
+            Child, index = random_child_unvisited[i]
+            if (self.verbose):
+                print("Considered child", self.game.get_state_from_id(Child.state), "UTC: inf in", Len )
+            return Child,index
 
         MaxWeight = 0.0
         best_action = 1
@@ -76,7 +86,7 @@ class MCTS:
             Weight = self.EvalUTC(Child)
             # Weight = Child.sputc
             if (self.verbose):
-                print("Considered child:", self.game.get_state_from_id(Child.state), "UTC:", Weight)
+                print("Considered child:", self.game.get_state_from_id(Child.state), "UTC:", Weight, "Visits:",Child.visits)
             if (Weight > MaxWeight):
                 MaxWeight = Weight
                 SelectedChild = Child
@@ -166,10 +176,17 @@ class MCTS:
                 print("CurrentState:", self.game.get_state_from_id(CurrentState))
                 #game.PrintTablesScores(CurrentState)
             if self.game.done(CurrentState) :
+                oldState = CurrentState
                 CurrentState, reward = self.game.step2(CurrentState, action)
+                if reward > 0:
+                    self.arr.add((self.game.get_state_from_id(oldState),reward))
+                break
                 Level += 1.0
                 Result = Result + reward
-                break
+
+        if (self.verbose):
+            print("Value returned :", Result)
+
         return Result
 
     # -----------------------------------------------------------------------#
@@ -193,6 +210,8 @@ class MCTS:
             CurrentNode.ressq += Result ** 2
             CurrentNode.visits += 1
             self.EvalUTC(CurrentNode)
+            if self.verbose:
+                print("Parent Cosidered : ", self.game.get_state_from_id(CurrentNode.state))
 
     # self.root.wins += Result
     # self.root.ressq += Result**2
@@ -218,7 +237,7 @@ class MCTS:
     # -----------------------------------------------------------------------#
     def EvalUTC(self, Node):
         # c = np.sqrt(2)
-        c = 4
+        c = 1.41
         w = Node.wins
         n = Node.visits
         sumsq = Node.ressq
@@ -236,6 +255,24 @@ class MCTS:
         Node.sputc = UTC + Modification
         return Node.sputc
 
+    def SelectBestAction(self, Node):
+        if len(Node.children) == 0:
+            return Node,1
+        index = 0
+        MaxWeight = 0.0
+        best_action = 1
+        index = 0
+        for Child in Node.children:
+            Weight = Child.visits
+            # Weight = Child.sputc
+            if (self.verbose):
+                print("Considered child:", self.game.get_state_from_id(Child.state), "UTC:", Weight)
+            if (Weight > MaxWeight):
+                MaxWeight = Weight
+                SelectedChild = Child
+                best_action = index+1
+            index = index + 1
+        return SelectedChild,best_action
     # -----------------------------------------------------------------------#
     # Description:
     #	Gets the level of the node in the tree.
@@ -295,45 +332,44 @@ class MCTS:
         f.write(str(Result) + '\n')
         f.close()
 
+    def getStatesReached(self):
+        print(len(self.arr))
+
     # -----------------------------------------------------------------------#
     # Description:
     #	Runs the SP-MCTS.
     # MaxIter	- Maximum iterations to run the search algorithm.
     # -----------------------------------------------------------------------#
-    def Run(self, MaxIter=5000):
+    def Run(self, MaxIter=5000, seed=40):
         action = 0
-        for i in range(MaxIter):
-            if self.verbose:
-                print("\n===== Begin iteration:", i, "=====")
+        if self.verbose:
+            print("Search for best action")
+        while True:
             X, action = self.Selection()
-            #print("State is : ", game.get_state_from_id(X.state))
+            if self.verbose:
+                print("node : ", self.game.get_state_from_id(X.state))
+            if self.IsTerminal(X):
+                break
             Y = self.Expansion(X)
             if (Y):
-                Result = self.Simulation(Y)
-                #print("Result: ", Result)
-                self.Backpropagation(Y, Result)
+                for k in range(1, MaxIter):
+                    if self.verbose:
+                        print("\n===== Begin iteration:", k, "=====")
+                    Result = self.Simulation(Y)
+                    self.Backpropagation(Y, Result)
             else:
                 Result = self.game.reward_model[X.state]
                 #print("Result: ", Result)
                 self.Backpropagation(X, Result)
             #print(Result)
             #self.PrintResult(Result)
+            break
+        if self.verbose:
+            print("Search complete.")
+        _, BestAction = self.SelectBestAction(self.root)
+        if self.verbose:
+            print(BestAction, self.game.get_state_from_id(self.root.state))
+            print("Root node : " , self.game.get_state_from_id(self.root.state))
+        return BestAction
 
-        # print("Search complete.")
-        # print("Iterations:", i)
-        return action
-# l = []
-# moving_average = []
-# for k in range (1, 500):
-#     cost = 0.0
-#     for i in range(1,10):
-#         n = nd.Node(0)
-#         mcts = MCTS(n, env,False)
-#         #print("Running the MCTS")
-#         mcts.Run(k)
-#         cost = cost + n.sputc
-#     l.append(cost/10)
-#     moving_average.append(np.mean(l))
-# plt.plot(moving_average)
-# plt.show()
 

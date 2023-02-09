@@ -23,18 +23,33 @@ MAX_STATES = 20000
 num = 2
 tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 
-DEFAULT_DIST2 = [[[0.055, 0.472, 0.94,  1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.   ],
-                [0.019, 0.242, 0.765, 0.983, 1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,   1.,   ]],
-                [[0.023, 0.264, 0.762, 0.98,  1.,    1.,    1.,    1.,    1.,    1.,    1.,     1.,    1.,    1.   ],
-                [0.156, 0.933, 1.,    1.,    1.,   1.,    1.,    1.,    1.,    1.,    1.,   1.,    1.,    1.   ]]]
+# DEFAULT_DIST2 = [[[0.87, 0.59,  0.968, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,    1.   ],
+#                 [0.229, 0.911, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,    1.   ]],
+#                 [[0.032, 0.427, 0.923, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.    ],
+#                 [0.03,  0.345, 0.884, 0.991, 1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,    1.    ]]]
+#
+# DEFAULT_TIMES2 = [[4, 3],
+#                   [2, 4]]
+# DEFAULT_EDIST = [[[0.24015373, 0.45464654, 0.30519973],
+#                  [0.34614808, 0.3474152,  0.30643672]],
+#
+#                 [[0.31282752, 0.30373012, 0.38344236],
+#                  [0.34851941, 0.30160948, 0.34987111]]]
 
-DEFAULT_TIMES2 = [[3, 4],
+DEFAULT_DIST2 = [[[0.072, 0.501, 0.904, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.   ],
+                [0.037, 0.333, 0.821, 0.986, 1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,    1. ]],
+                [[0.014, 0.19,  0.717, 0.981, 1.,    1.,    1.,    1.,    1.,    1.,    1,  1.,    1.   ],
+                [0.016, 0.702, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,   1.,    1.    ]]]
+
+DEFAULT_TIMES2 = [[3, 3],
                   [4, 2]]
-DEFAULT_EDIST = [[[0.31256755, 0.31286336, 0.3745691 ],
-                [0.25796517, 0.35366353, 0.3883713 ]],
+DEFAULT_EDIST = [[[0.24015373, 0.45464654, 0.30519973],
+                 [0.34614808, 0.3474152,  0.30643672]],
 
-                [[0.31637855, 0.33429033, 0.34933112],
-                [0.28230489, 0.29302489, 0.42467022]]]
+                [[0.31282752, 0.30373012, 0.38344236],
+                 [0.34851941, 0.30160948, 0.34987111]]]
+
+
 
 DEFAULT_ETIMES = np.array([[2, 2], [2, 2]])
 
@@ -68,6 +83,7 @@ class MetaWorldEnv:
         self.reward_model = self.get_reward_model()
         self.isStochasticR, self.isStochasticN, self.isStochasticS = self.is_stochastic()
         self.terminal_state = self.set_terminal()
+
 
     def add_state(self, s):
         if s not in self.state_space:
@@ -256,9 +272,9 @@ class MetaWorldEnv:
             exec_time = state_l[3 * j]
             curr_time = state_l[0]
             last_action_id = self.actions_per_plan-1
-            if curr_time > self.deadline:
+            if curr_time >= self.deadline:
                 return True
-            elif pt_invested > 0 and exec_time >= self.actions_per_plan and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
+            elif pt_invested > 0  and exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
                 return True
         return False
 
@@ -274,9 +290,9 @@ class MetaWorldEnv:
                 exec_time = state_l[3 * j]
                 curr_time = state_l[0]
                 last_action_id = self.actions_per_plan - 1
-                if curr_time > self.deadline:
+                if curr_time >= self.deadline:
                     arr[i] = True
-                elif pt_invested > 0 and exec_time >= self.actions_per_plan and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
+                elif pt_invested > 0 and exec_time > 0  and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
                     arr[i] = True
 
         return arr
@@ -300,7 +316,7 @@ class MetaWorldEnv:
                 t_prob = self.planning_dist[plan_id][last_action_id][pt_invested]
                 curr_time = state_l[0]
 
-                if pt_invested > 0 and exec_time >= self.actions_per_plan and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
+                if pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
                     r = 100.0
             reward[i] = r
         return reward
@@ -321,3 +337,18 @@ class MetaWorldEnv:
 
     def get_action_from_action_index(self, action_index):
         return self.actions[action_index]
+
+    def print_for_me(self):
+        print(self.planning_dist)
+
+
+    def successStates(self):
+        n = 0
+        p = 0
+        for i in range(0, self.num_of_states):
+            if self.reward_model[i] > 0:
+                n = n+1
+            if self.terminal_state[i]:
+                p = p + 1
+
+        return n,p,self.num_of_states

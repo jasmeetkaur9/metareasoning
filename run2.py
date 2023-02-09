@@ -10,8 +10,9 @@ from metaEnvTest import MetaWorldEnvM
 from single_player import MCTS
 import Node as nd
 import matplotlib.pyplot as plt
+import scipy.stats as st
 
-random.seed(40)
+random.seed(10)
 MAX_STATES = 20000
 
 
@@ -79,29 +80,30 @@ if __name__ == "__main__":
     # test()
     for t_ in range(4, 5):
         space_size = 0
-        samples = 30
+        samples = 1
         max_iter = 1000
         cost_values = np.zeros((max_iter+2,samples+1), dtype="float")
         ctime = np.zeros((max_iter+2,samples+1), dtype="float")
         for sample_num in range(0, samples):
-            # print("SAMPLE : ",sample_num)
+            print("SAMPLE : ",sample_num)
             m = [5, 10, 5]
             v = [2, 1, 3]
             num_of_plans = 2
             actions_per_plan = 2
-            max_planning_time = np.array([4,3])
+            max_planning_time = np.array([4,4])
             # total_time = (2 * 3 * max_planning_time) + 2  #remove total_time from the formulation
-            deadline = 6
+            deadline = 5
             actions = [1, 2]
             dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
             e_dist, e_times = get_execution_distributions(num_of_plans,actions_per_plan,max_execution_time=3)
             # print(dist)
             # print(e_dist)
-            env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time, dist, planning_times,e_dist,e_times)
+            env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time)
             mw = MetaReasoningWorld(env)
+            print(env.successStates())
 
             # its, v, p, t = mw.do_value_iteration(100)
-
+            env.print_for_me()
             P = env.transition_model
             P = np.swapaxes(P, 0, 1)
             reward_model = np.zeros((env.num_of_states, env.num_of_plans), dtype="float")
@@ -122,59 +124,55 @@ if __name__ == "__main__":
             # print("Computation Time in secs ", t)
             # print("Resultant policy", mw.get_policy_from_path(p))
             cost1 = 0.0
-            runs = 1
+            seed_list = [2, 5, 10, 15, 20, 25, 30, 35, 40, 45]
+            runs = 100
+            s = []
             for i in range(0, runs):
                 pp, state_path, solution_cost = mw.get_policy_from_path(p)
                 cost1 = cost1 + solution_cost
-                print(solution_cost)
-                print(pp)
-                print(state_path)
+                s.append(solution_cost)
+                #print(solution_cost)
+                # print(pp)
             cost1 = cost1/runs
+            print(np.mean(s))
+            #print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
             ctime[0][sample_num] = t1
-            cost_values[0][sample_num] = cost1
-
+            cost_values[0][sample_num] = np.mean(s)
+            print("DO MCTS")
             #Do MCTS
-            for k in range(1, max_iter+1):
+            for k in [10000]:
                 runs = 1
-                cost = 0.0
-                for i in range(0, runs):
+                cost_total = 0.0
+                s = []
+                for i in range(0,runs):
                     st_time = time.time()
                     curr_id = 0
                     pp = []
+                    cost = 0.0
                     state_path = []
-                    while True:
-                        cost = cost + env.reward_model[curr_id]
-                        n = nd.Node(curr_id)
-                        mcts = MCTS(n, env, False)
-                        best_action = mcts.Run(k)
-                        pp.append(best_action)
-                        state_path.append(env.get_state_from_id(curr_id))
-                        res, _, _ = env.step(curr_id, best_action)
-                        if env.done(curr_id):
-                            break
-                        list1 = list(res.keys())
-                        list2 = list(res.values())
-                        curr_id = (random.choices(list1, weights=list2, k=1))[0]
-                    pp.pop()
-                    # print(cost)
+                    cost = cost + env.reward_model[curr_id]
+                    n = nd.Node(curr_id)
+                    mcts = MCTS(n, env, False)
+                    best_action = mcts.Run(k)
+                    mcts.getStatesReached()
+                    pp.append(best_action)
+                    state_path.append(env.get_state_from_id(curr_id))
+                    res, _, _ = env.step(curr_id, best_action)
+                    if env.done(curr_id):
+                        break
+                    list1 = list(res.keys())
+                    list2 = list(res.values())
+                    curr_id = (random.choices(list1, weights=list2, k=1))[0]
+                    # pp.pop()
+                    # cost_total = cost_total + cost
+                    # s.append(cost)
                     # print(pp)
-                    # print(state_path)
-                t1 = time.time() - st_time
-                ctime[k][sample_num] = t1
-                cost_values[k][sample_num] = cost
+                # t1 = time.time() - st_time
+                # print(np.mean(s))
+                # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
+                # ctime[k][sample_num] = t1
+                # cost_values[k][sample_num] = np.mean(s)
         avg = []
         moving_avg = []
         std = []
-        print("Average")
-        for k in range(0, max_iter+1):
-            avg.append(np.mean(cost_values[k]))
-            moving_avg.append(np.mean(avg))
-            print(avg[k])
-        print("Std")
-        for k in range(0, max_iter+1):
-            std.append(np.std(cost_values[k]))
-            print(std[k])
-        print("Moving Average")
-        for k in range(0, max_iter+1):
-            print(moving_avg[k])
 

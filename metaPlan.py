@@ -79,6 +79,7 @@ class MetaReasoningWorld:
         policy = []
         state_path = []
         cost = 0.0
+        i = 1
         while True:
             state_path.append(self.env.get_state_from_id(curr_id))
             curr_state_ls = list(self.env.get_state_from_id(curr_id))
@@ -90,6 +91,8 @@ class MetaReasoningWorld:
                 break
             list1 = list(res.keys())
             list2 = list(res.values())
+            random.seed(i+78)
+            i=i+1
             curr_id = (random.choices(list1, weights=list2, k=1))[0]
         policy.pop()
         return policy, state_path, cost

@@ -69,7 +69,6 @@ def get_execution_distributions(num_of_plans, num_of_actions,max_execution_time)
 
 if __name__ == "__main__":
 
-    # test()
     for t_ in range(4, 5):
         space_size = 0
         samples = 1
@@ -83,7 +82,6 @@ if __name__ == "__main__":
             num_of_plans = 2
             actions_per_plan = 2
             max_planning_time = np.array([4,4])
-            # total_time = (2 * 3 * max_planning_time) + 2  #remove total_time from the formulation
             deadline = 5
             actions = [1, 2]
             dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
@@ -112,10 +110,6 @@ if __name__ == "__main__":
 
             p = list(vi.policy)
             p = [x + 1 for x in p]
-
-            # print("Size of State Space ", env.num_of_states)
-            # print("Computation Time in secs ", t)
-            # print("Resultant policy", mw.get_policy_from_path(p))
             cost1 = 0.0
             seed_list = [2, 5, 10, 15, 20, 25, 30, 35, 40, 45]
             runs = 100
@@ -124,15 +118,15 @@ if __name__ == "__main__":
                 pp, state_path, solution_cost = mw.get_policy_from_path(p)
                 cost1 = cost1 + solution_cost
                 s.append(solution_cost)
-                #print(solution_cost)
+                # print(solution_cost)
                 # print(pp)
             cost1 = cost1/runs
             print(np.mean(s))
-            #print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
+            # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
             ctime[0][sample_num] = t1
             cost_values[0][sample_num] = np.mean(s)
             print("DO MCTS")
-            #Do MCTS
+            # Do MCTS
             for k in [10]:
                 runs = 1
                 cost_total = 0.0

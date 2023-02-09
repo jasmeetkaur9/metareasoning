@@ -116,12 +116,6 @@ class MCTS:
         else:
             return False
 
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Evaluates all the possible children states given a Node state
-    #	and returns the possible children Nodes.
-    # Node	- Node from which to evaluate children.
-    # -----------------------------------------------------------------------#
     def EvalChildren(self, Node):
         Children = []
         Actions = []

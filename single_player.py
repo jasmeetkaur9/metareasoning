@@ -2,8 +2,6 @@ import Node as nd
 import numpy as np
 import random
 import os
-# Import your game implementation here.
-from matplotlib import pyplot as plt
 episodes = 1
 rewards = []
 moving_average = []
@@ -14,10 +12,7 @@ actions_per_plan = 2
 max_planning_time = 6
 deadline = 3
 actions = [1, 2]
-#env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time)
-#game = env
-#print("done initializing the env")
-#random.seed(40)
+
 
 class MCTS:
 
@@ -121,8 +116,6 @@ class MCTS:
         else:
             return False
 
-    # return False # Why is this here?
-
     # -----------------------------------------------------------------------#
     # Description:
     #	Evaluates all the possible children states given a Node state
@@ -139,11 +132,6 @@ class MCTS:
             Children.append(ChildNode)
         return Children
 
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Selects a child node randomly.
-    # Node	- Node from which to select a random child.
-    # -----------------------------------------------------------------------#
     def SelectChildNode(self, Node):
         # Randomly selects a child node.
         Len = len(Node.children)
@@ -151,11 +139,6 @@ class MCTS:
         i = np.random.randint(0, Len)
         return Node.children[i]
 
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Performs the simulation phase of the MCTS.
-    # Node	- Node from which to perform simulation.
-    # -----------------------------------------------------------------------#
     def Simulation(self, Node):
         CurrentState = Node.state
         # if(any(CurrentState) == False):
@@ -188,12 +171,6 @@ class MCTS:
 
         return Result
 
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Performs the backpropagation phase of the MCTS.
-    # Node		- Node from which to perform Backpropagation.
-    # Result	- Result of the simulation performed at Node.
-    # -----------------------------------------------------------------------#
     def Backpropagation(self, Node, Result):
         # Update Node's weight.
         if self.verbose:
@@ -215,28 +192,12 @@ class MCTS:
             if self.verbose:
                 print("Parent Considered : ", self.game.get_state_from_id(CurrentNode.state))
 
-    # self.root.wins += Result
-    # self.root.ressq += Result**2
-    # self.root.visits += 1
-    # self.EvalUTC(self.root)
-
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Checks if Node has a parent..
-    # Node - Node to check.
-    # -----------------------------------------------------------------------#
     def HasParent(self, Node):
         if (Node.parent == None):
             return False
         else:
             return True
 
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Evaluates the Single Player modified UTC. See:
-    #	https://dke.maastrichtuniversity.nl/m.winands/documents/CGSameGame.pdf
-    # Node - Node to evaluate.
-    # -----------------------------------------------------------------------#
     def EvalUTC(self, Node):
         # c = np.sqrt(2)
         c = 1.41
@@ -249,12 +210,7 @@ class MCTS:
             t = Node.parent.visits
 
         UTC = w / n + c * np.sqrt(np.log(t) / n)
-        D = 10000.
-        Modification = 0.0
-        #Modification = np.sqrt((sumsq - n * (w / n) ** 2 + D) / n)
-        # print "Original", UTC
-        # print "Mod", Modification
-        Node.sputc = UTC + Modification
+        Node.sputc = UTC
         return Node.sputc
 
     def SelectBestAction(self, Node):
@@ -272,11 +228,7 @@ class MCTS:
                 best_action = index+1
             index = index + 1
         return SelectedChild,best_action
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Gets the level of the node in the tree.
-    # Node - Node to evaluate the level.
-    # -----------------------------------------------------------------------#
+
     def GetLevel(self, Node):
         Level = 0.0
         while (Node.parent):
@@ -284,23 +236,12 @@ class MCTS:
             Node = Node.parent
         return Level
 
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Prints the tree to file.
-    # -----------------------------------------------------------------------#
     def PrintTree(self):
         f = open('Tree.txt', 'w')
         Node = self.root
         self.PrintNode(f, Node, "", False)
         f.close()
 
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Prints the tree Node and its details to file.
-    # Node			- Node to print.
-    # Indent		- Indent character.
-    # IsTerminal	- True: Node is terminal. False: Otherwise.
-    # -----------------------------------------------------------------------#
     def PrintNode(self, file, Node, Indent, IsTerminal):
         file.write(Indent)
         if (IsTerminal):
@@ -334,11 +275,6 @@ class MCTS:
     def getStatesReached(self):
         print(len(self.arr))
 
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Runs the SP-MCTS.
-    # MaxIter	- Maximum iterations to run the search algorithm.
-    # -----------------------------------------------------------------------#
     def Run(self, MaxIter=5000, seed=40):
         action = 0
         while True:

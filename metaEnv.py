@@ -272,7 +272,7 @@ class MetaWorldEnv:
             exec_time = state_l[3 * j]
             curr_time = state_l[0]
             last_action_id = self.actions_per_plan-1
-            if curr_time >= self.deadline:
+            if curr_time > self.deadline:
                 return True
             elif pt_invested > 0  and exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
                 return True
@@ -290,7 +290,7 @@ class MetaWorldEnv:
                 exec_time = state_l[3 * j]
                 curr_time = state_l[0]
                 last_action_id = self.actions_per_plan - 1
-                if curr_time >= self.deadline:
+                if curr_time > self.deadline:
                     arr[i] = True
                 elif pt_invested > 0 and exec_time > 0  and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
                     arr[i] = True
@@ -317,7 +317,7 @@ class MetaWorldEnv:
                 curr_time = state_l[0]
 
                 if pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
-                    r = 100.0
+                    r = 100
             reward[i] = r
         return reward
 

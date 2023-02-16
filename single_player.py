@@ -44,12 +44,6 @@ class MCTS:
 
         return SelectedChild,BestAction
 
-    # -----------------------------------------------------------------------#
-    # Description:
-    #	Given a Node, selects the first unvisited child Node, or if all
-    # 	children are visited, selects the Node with greatest UTC value.
-    # Node	- Node from which to select child Node from.
-    # -----------------------------------------------------------------------#
     def SelectChild(self, Node):
         if (len(Node.children) == 0):
             return Node,1
@@ -70,7 +64,7 @@ class MCTS:
             i = np.random.randint(0, Len)
             Child, index = random_child_unvisited[i]
             if (self.verbose):
-                print("Considered child", self.game.get_state_from_id(Child.state), "UTC: inf in", Len )
+                print("Considered child", self.game.get_state_from_id(Child.state), "UTC: inf" )
             return Child,index
 
         MaxWeight = 0.0
@@ -147,22 +141,22 @@ class MCTS:
             action = random.choice(self.game.actions)
             CurrentState, reward = self.game.step2(CurrentState,action)
             Level += 1.0
-            Result = Result + reward
+            if reward > 0 :
+                Result = Result + 1
             if (self.verbose):
                 print("CurrentState:", self.game.get_state_from_id(CurrentState))
-                #game.PrintTablesScores(CurrentState)
             if self.game.done(CurrentState) :
                 oldState = CurrentState
                 CurrentState, reward = self.game.step2(CurrentState, action)
                 if reward > 0:
-                    self.arr.add((self.game.get_state_from_id(oldState),reward))
+                    self.arr.add((self.game.get_state_from_id(oldState)))
                 Level += 1.0
-                Result = Result + reward
+                if reward > 0:
+                    Result = Result + 1
                 break
 
         if (self.verbose):
             print("Value returned :", Result)
-
         return Result
 
     def Backpropagation(self, Node, Result):
@@ -230,12 +224,6 @@ class MCTS:
             Node = Node.parent
         return Level
 
-    def PrintTree(self):
-        f = open('Tree.txt', 'w')
-        Node = self.root
-        self.PrintNode(f, Node, "", False)
-        f.close()
-
     def PrintNode(self, file, Node, Indent, IsTerminal):
         file.write(Indent)
         if (IsTerminal):
@@ -255,41 +243,31 @@ class MCTS:
         for Child in Node.children:
             self.PrintNode(file, Child, Indent, self.IsTerminal(Child))
 
-    def PrintResult(self, Result):
-        filename = 'Results.txt'
-        if os.path.exists(filename):
-            append_write = 'a'  # append if already exists
-        else:
-            append_write = 'w'  # make a new file if not
-
-        f = open(filename, append_write)
-        f.write(str(Result) + '\n')
-        f.close()
-
     def getStatesReached(self):
         print(len(self.arr))
 
     def Run(self, MaxIter=5000, seed=40):
         action = 0
-        while True:
+        self.arr.clear()
+        for i in range(0, MaxIter):
             X, action = self.Selection()
-            if self.IsTerminal(X):
-                break
+            if self.verbose:
+                print("Selected",self.game.get_state_from_id(X.state))
             Y = self.Expansion(X)
             if (Y):
-                for k in range(1, MaxIter):
-                    if self.verbose:
-                        print("\n===== Begin iteration:", k, "=====")
-                    Result = self.Simulation(Y)
-                    self.Backpropagation(Y, Result)
+                if self.verbose:
+                    print("Expanded",self.game.get_state_from_id(Y.state))
+                Result = self.Simulation(Y)
+                self.Backpropagation(Y, Result)
             else:
                 Result = self.game.reward_model[X.state]
                 self.Backpropagation(X, Result)
+        #self.getStatesReached()
         if self.verbose:
             print("Search complete.")
         _, BestAction = self.SelectBestAction(self.root)
         if self.verbose:
-            print("Best Action :" ,BestAction,"For node :", self.game.get_state_from_id(self.root.state))
+            print("Best Action :", BestAction, "For node :", self.game.get_state_from_id(self.root.state))
             # print("Root node : " , self.game.get_state_from_id(self.root.state))
         return BestAction
 

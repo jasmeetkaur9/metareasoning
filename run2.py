@@ -20,7 +20,7 @@ MAX_STATES = 20000
 
 def get_single_distribution(max_planning_time_, mean, variance,padding,mpt):
     x = np.random.normal(loc=mean, scale=variance, size=1000)
-    index = random.randint(2, max_planning_time_)
+    index = random.randint(1, max_planning_time_)
     count, bins_count = np.histogram(x, index + 1)
     pdf = count / sum(count)
     cdf = np.cumsum(pdf)
@@ -76,19 +76,20 @@ if __name__ == "__main__":
         cost_values = np.zeros((max_iter+2,samples+1), dtype="float")
         ctime = np.zeros((max_iter+2,samples+1), dtype="float")
         for sample_num in range(0, samples):
-            # print("SAMPLE : ",sample_num)
+            print("SAMPLE : ",sample_num)
             m = [5, 10, 5]
             v = [2, 1, 3]
             num_of_plans = 2
             actions_per_plan = 2
-            max_planning_time = np.array([4,4])
-            deadline = 5
+            max_planning_time = np.array([3,3])
+            deadline = 8
             actions = [1, 2]
             dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
             e_dist, e_times = get_execution_distributions(num_of_plans,actions_per_plan,max_execution_time=3)
             # print(dist)
             # print(e_dist)
-            env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time)
+            env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time,
+                               dist,planning_times,e_dist,e_times)
             mw = MetaReasoningWorld(env)
             print(env.successStates())
 
@@ -122,13 +123,17 @@ if __name__ == "__main__":
                 # print(pp)
             cost1 = cost1/runs
             print(np.mean(s))
+            print(np.std(s))
             # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
             ctime[0][sample_num] = t1
             cost_values[0][sample_num] = np.mean(s)
             print("DO MCTS")
             # Do MCTS
-            for k in [10]:
-                runs = 1
+            # [2,5,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,1000]:
+            list_k = []
+            list_k_sd = []
+            for k in [8000]:
+                runs = 100
                 cost_total = 0.0
                 s = []
                 for i in range(0,runs):
@@ -137,29 +142,36 @@ if __name__ == "__main__":
                     pp = []
                     cost = 0.0
                     state_path = []
+                    test = 0
                     while True :
-                        print("Finding the best action")
                         cost = cost + env.reward_model[curr_id]
                         n = nd.Node(curr_id)
-                        mcts = MCTS(n, env, True)
+                        mcts = 0
+                        mcts = MCTS(n, env, False)
                         best_action = mcts.Run(k)
-                        mcts.getStatesReached()
                         pp.append(best_action)
                         state_path.append(env.get_state_from_id(curr_id))
                         res, _, _ = env.step(curr_id, best_action)
-                        if env.done(curr_id):
-                            break
                         list1 = list(res.keys())
                         list2 = list(res.values())
                         curr_id = (random.choices(list1, weights=list2, k=1))[0]
+                        if env.done(curr_id):
+                            cost = cost + env.reward_model[curr_id]
+                            break
+                        test = test + 1
                     pp.pop()
                     cost_total = cost_total + cost
                     s.append(cost)
+                list_k.append(np.mean(s))
+                list_k_sd.append(np.std(s))
                 t1 = time.time() - st_time
-                print(np.mean(s))
                 # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
-                ctime[k][sample_num] = t1
-                cost_values[k][sample_num] = np.mean(s)
+                # ctime[k][sample_num] = t1
+                # cost_values[k][sample_num] = np.mean(s)
+            for i in range(0,len(list_k)):
+                print(list_k[i])
+            for i in range(0,len(list_k)):
+                print(list_k_sd[i])
         avg = []
         moving_avg = []
         std = []

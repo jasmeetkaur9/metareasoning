@@ -23,31 +23,31 @@ MAX_STATES = 20000
 num = 2
 tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 
-# DEFAULT_DIST2 = [[[0.87, 0.59,  0.968, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,    1.   ],
-#                 [0.229, 0.911, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,    1.   ]],
-#                 [[0.032, 0.427, 0.923, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.    ],
-#                 [0.03,  0.345, 0.884, 0.991, 1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,    1.    ]]]
-#
-# DEFAULT_TIMES2 = [[4, 3],
-#                   [2, 4]]
-# DEFAULT_EDIST = [[[0.24015373, 0.45464654, 0.30519973],
-#                  [0.34614808, 0.3474152,  0.30643672]],
-#
-#                 [[0.31282752, 0.30373012, 0.38344236],
-#                  [0.34851941, 0.30160948, 0.34987111]]]
+DEFAULT_DIST2 = [[[0.111, 0.823, 1.,    1.,    1.,    1.   ],
+                 [0.032, 0.452, 0.953, 1.,    1.,    1.   ]],
+                [[0.039, 0.415, 0.923, 1.,    1.,    1.   ],
+                 [0.519, 1.,    1.,    1.,    1.,    1.   ]]]
 
-DEFAULT_DIST2 = [[[0.072, 0.501, 0.904, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.],
-                  [0.037, 0.333, 0.821, 0.986, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]],
-                 [[0.014, 0.19, 0.717, 0.981, 1., 1., 1., 1., 1., 1., 1, 1., 1.],
-                  [0.016, 0.702, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]]]
-
-DEFAULT_TIMES2 = [[3, 3],
-                  [4, 2]]
+DEFAULT_TIMES2 = [[4, 3],
+                  [2, 4]]
 DEFAULT_EDIST = [[[0.24015373, 0.45464654, 0.30519973],
-                  [0.34614808, 0.3474152, 0.30643672]],
+                 [0.34614808, 0.3474152,  0.30643672]],
 
-                 [[0.31282752, 0.30373012, 0.38344236],
-                  [0.34851941, 0.30160948, 0.34987111]]]
+                [[0.31282752, 0.30373012, 0.38344236],
+                 [0.34851941, 0.30160948, 0.34987111]]]
+
+# DEFAULT_DIST2 = [[[0.072, 0.501, 0.904, 1., 1.],
+#                   [0.037, 0.333, 0.821, 0.986, 1.]],
+#                  [[0.014, 0.19, 0.717, 0.981, 1.],
+#                   [0.016, 0.702, 1., 1., 1.]]]
+#
+# DEFAULT_TIMES2 = [[3, 3],
+#                   [4, 2]]
+# DEFAULT_EDIST = [[[0.24015373, 0.45464654, 0.30519973],
+#                   [0.34614808, 0.3474152, 0.30643672]],
+#
+#                  [[0.31282752, 0.30373012, 0.38344236],
+#                   [0.34851941, 0.30160948, 0.34987111]]]
 
 DEFAULT_ETIMES = np.array([[2, 2], [2, 2]])
 
@@ -65,7 +65,7 @@ class MetaWorldEnv:
         self.actions_per_plan = actions_per_plan_
         self.max_planning_time = max_planning_time_
         self.deadline = deadline_
-        self.verbose = verbosegit
+        self.verbose = verbose
         self.planning_dist = planning_dist_
         self.planning_times = planning_times_
         self.execution_dist = execution_dist_
@@ -132,25 +132,24 @@ class MetaWorldEnv:
                 index_pt = 3 * act - 1
                 index_et = 3 * act
 
-                exec_time = curr_st_l[index_et]
-
                 if curr_time > self.deadline:
                     tm[curr_st_id][act - 1][curr_st_id] = 1.0
                     continue
 
-                last_refined_action = next_st1_l[
-                    index_last_action]  # next symbolic action to transition depends on action
+                last_refined_action = next_st1_l[index_last_action]  # next symbolic action
                 pt_invested = next_st1_l[index_pt]
-                t_prob = self.planning_dist[act - 1][last_refined_action][pt_invested]
+                exec_time = curr_st_l[index_et]
+                t_prob = self.get_t_prob(act,last_refined_action,pt_invested)
 
                 next_st1_l[index_pt] = next_st1_l[index_pt] + 1  # increase planning time for the first state
                 next_st1 = tuple(next_st1_l)  # convert it into a tuple for the states list
                 assert (next_st1_l[0] == curr_st_l[0] + 1)
                 state_id = self.add_state(next_st1)  # append to the main set
+
                 if self.verbose:
                     print("Adding : ", curr_st_id, state_id, next_st1_l, 1.0 - t_prob)
-                tm[curr_st_id][act - 1][state_id] = (1.0 - t_prob)
 
+                tm[curr_st_id][act - 1][state_id] = (1.0 - t_prob)
                 tmp.add(next_st1)  # append to the tmp set for loop
 
                 if next_st2_l[index_last_action] + 1 < self.actions_per_plan:  # add only valid state
@@ -158,7 +157,7 @@ class MetaWorldEnv:
                     next_st2_l[index_last_action] = next_st2_l[index_last_action] + 1  # next_action
                     next_st2_l[index_pt] = 0  # make the planning time = 0
 
-                    #                     execution time invested so far
+                    # execution time invested so far
                     execution_time_so_far = next_st2_l[index_et]
 
                     next_st2i_l = next_st2_l.copy()
@@ -175,10 +174,9 @@ class MetaWorldEnv:
                         state_id = self.add_state(next_st2)
                         if self.verbose:
                             print("Adding - - : ", curr_st_id, state_id, next_st2i_l, t_prob * e_prob)
-                        tm[curr_st_id][act - 1][state_id] = t_prob * e_prob
 
+                        tm[curr_st_id][act - 1][state_id] = t_prob * e_prob
                         tmp.add(next_st2)  # append to the tmp list for loop
-                        log(next_st2)
 
                 if next_st3_l[index_last_action] + 1 == self.actions_per_plan:  # add only valid state
                     last_action = next_st3_l[index_last_action]
@@ -296,7 +294,6 @@ class MetaWorldEnv:
                     arr[i] = True
                 elif pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
                     arr[i] = True
-
         return arr
 
     def done(self, st_id):
@@ -314,10 +311,7 @@ class MetaWorldEnv:
                 pt_invested = state_l[3 * j - 1]
                 exec_time = state_l[3 * j]
                 last_action_id = self.actions_per_plan - 1
-
-                t_prob = self.planning_dist[plan_id][last_action_id][pt_invested]
                 curr_time = state_l[0]
-
                 if pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
                     r = 100
             reward[i] = r
@@ -349,6 +343,13 @@ class MetaWorldEnv:
             if pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
                 r = r + 100
         return r
+
+    def get_t_prob(self, act, last_refined_action, pt_invested):
+        max_planning_time = len(self.planning_dist[act - 1][last_refined_action])
+        if pt_invested >= max_planning_time:
+            return 1.0
+        else:
+            return self.planning_dist[act - 1][last_refined_action][pt_invested]
 
     # To check if the transition matrix is stochastic (DEBUG CALL)
     def is_stochastic(self):

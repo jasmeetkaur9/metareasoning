@@ -14,8 +14,6 @@ import matplotlib.pyplot as plt
 import scipy.stats as st
 
 if __name__ == "__main__":
-
-    space_size = 0
     samples = 1
     max_iter = 1000
     cost_values = np.zeros((max_iter + 2, samples + 1), dtype="float")
@@ -26,17 +24,19 @@ if __name__ == "__main__":
         v = [2, 1, 3]
         num_of_plans = 2
         actions_per_plan = 2
-        max_planning_time = np.array([2, 2])
+        max_planning_time = np.array([3, 3])
         deadline = 6
         actions = [1, 2]
         dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
         e_dist, e_times = get_execution_distributions(num_of_plans, actions_per_plan, max_execution_time=3)
         # print(dist)
         # print(e_dist)
-        env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time, False,
-                           dist, planning_times, e_dist, e_times)
+        env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time, False)
         mw = MetaReasoningWorld(env,False)
-        print(env.successStates())
+
+        # Print the number of successful terminal states, total terminal states, total states
+        # print(env.successStates())
+        # Print the distribution
         env.print_for_me()
 
         print("DO Value Iteration")
@@ -80,50 +80,47 @@ if __name__ == "__main__":
         print("DO MCTS")
         list_k = []
         list_k_sd = []
+
         # k is the number of rollout iterations
-        for k in [100]:
-            num_of_trials = 100
+        for k in [1000]:
+            num_of_trials = 10
             total_reward = 0.0
             s = []
-            for i in range(0, runs):
+            for i in range(0, num_of_trials):
                 st_time = time.time()
-                curr_id = 0
+                curr_state = 0
                 pp = []
                 reward = 0
                 state_path = []
                 test = 0
                 # Till the end of episode
                 while True:
-                    reward = reward + env.reward_model[curr_id]
-                    root_node = nd.Node(curr_id)
+                    reward = reward + env.reward_model[curr_state]
+                    root_node = nd.Node(curr_state)
 
                     mcts = MCTS(root_node, env, False)
                     best_action = mcts.Run(k)
 
                     pp.append(best_action)
-                    state_path.append(env.get_state_from_id(curr_id))
-
-                    res, _, _ = env.step(curr_id, best_action)
-                    list1 = list(res.keys())
-                    list2 = list(res.values())
-                    curr_id = (random.choices(list1, weights=list2, k=1))[0]  # sample the next state
-
-                    if env.done(curr_id):
-                        reward = reward + env.reward_model[curr_id]
+                    state_path.append(env.get_state_from_id(curr_state))
+                    next_state, _ = env.step_next_state(curr_state, best_action)
+                    curr_state = next_state
+                    if env.done(curr_state):
+                        reward = reward + env.reward_model[curr_state]
                         break
                     test = test + 1
                     pp.pop()
                     total_reward = total_reward + reward
                     s.append(reward)
-
+                print(np.mean(s))
                 list_k.append(np.mean(s))
                 list_k_sd.append(np.std(s))
                 t1 = time.time() - st_time
                 # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
-            for i in range(0, len(list_k)):
-                print(list_k[i])
-            for i in range(0, len(list_k)):
-                print(list_k_sd[i])
+            # for i in range(0, len(list_k)):
+            #     print(list_k[i])
+            # for i in range(0, len(list_k)):
+            #     print(list_k_sd[i])
         avg = []
         moving_avg = []
         std = []

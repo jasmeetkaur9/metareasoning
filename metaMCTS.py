@@ -1,4 +1,4 @@
-import Node as nd
+import metaNode as nd
 import numpy as np
 import random
 import os
@@ -114,7 +114,7 @@ class MCTS:
         Children = []
         Actions = []
         for action in range(self.game.num_of_actions):
-            next_state, reward = self.game.step2(Node.state, self.game.get_action_from_action_index(action))
+            next_state, reward = self.game.step_next_state(Node.state, self.game.get_action_from_action_index(action))
             done = self.game.done(next_state)
             ChildNode = nd.Node(next_state)
             Children.append(ChildNode)
@@ -139,7 +139,7 @@ class MCTS:
         # Perform simulation.
         while True:
             action = random.choice(self.game.actions)
-            CurrentState, reward = self.game.step2(CurrentState,action)
+            CurrentState, reward = self.game.step_next_state(CurrentState,action)
             Level += 1.0
             if reward > 0 :
                 Result = Result + 1
@@ -147,7 +147,7 @@ class MCTS:
                 print("CurrentState:", self.game.get_state_from_id(CurrentState))
             if self.game.done(CurrentState) :
                 oldState = CurrentState
-                CurrentState, reward = self.game.step2(CurrentState, action)
+                CurrentState, reward = self.game.step_next_state(CurrentState, action)
                 if reward > 0:
                     self.arr.add((self.game.get_state_from_id(oldState)))
                 Level += 1.0

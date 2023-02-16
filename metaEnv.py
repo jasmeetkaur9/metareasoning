@@ -36,27 +36,25 @@ tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 #                 [[0.31282752, 0.30373012, 0.38344236],
 #                  [0.34851941, 0.30160948, 0.34987111]]]
 
-DEFAULT_DIST2 = [[[0.072, 0.501, 0.904, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.   ],
-                [0.037, 0.333, 0.821, 0.986, 1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,    1. ]],
-                [[0.014, 0.19,  0.717, 0.981, 1.,    1.,    1.,    1.,    1.,    1.,    1,  1.,    1.   ],
-                [0.016, 0.702, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,   1.,    1.    ]]]
+DEFAULT_DIST2 = [[[0.072, 0.501, 0.904, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.],
+                  [0.037, 0.333, 0.821, 0.986, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]],
+                 [[0.014, 0.19, 0.717, 0.981, 1., 1., 1., 1., 1., 1., 1, 1., 1.],
+                  [0.016, 0.702, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]]]
 
 DEFAULT_TIMES2 = [[3, 3],
                   [4, 2]]
 DEFAULT_EDIST = [[[0.24015373, 0.45464654, 0.30519973],
-                 [0.34614808, 0.3474152,  0.30643672]],
+                  [0.34614808, 0.3474152, 0.30643672]],
 
-                [[0.31282752, 0.30373012, 0.38344236],
-                 [0.34851941, 0.30160948, 0.34987111]]]
-
-
+                 [[0.31282752, 0.30373012, 0.38344236],
+                  [0.34851941, 0.30160948, 0.34987111]]]
 
 DEFAULT_ETIMES = np.array([[2, 2], [2, 2]])
 
 
 class MetaWorldEnv:
 
-    def __init__(self, num_of_plans_, actions_per_plan_, deadline_, actions_, max_planning_time_,
+    def __init__(self, num_of_plans_, actions_per_plan_, deadline_, actions_, max_planning_time_, verbose,
                  planning_dist_=DEFAULT_DIST2,
                  planning_times_=DEFAULT_TIMES2,
                  execution_dist_=DEFAULT_EDIST,
@@ -67,6 +65,7 @@ class MetaWorldEnv:
         self.actions_per_plan = actions_per_plan_
         self.max_planning_time = max_planning_time_
         self.deadline = deadline_
+        self.verbose = verbosegit
         self.planning_dist = planning_dist_
         self.planning_times = planning_times_
         self.execution_dist = execution_dist_
@@ -83,7 +82,6 @@ class MetaWorldEnv:
         self.reward_model = self.get_reward_model()
         self.isStochasticR, self.isStochasticN, self.isStochasticS = self.is_stochastic()
         self.terminal_state = self.set_terminal()
-
 
     def add_state(self, s):
         if s not in self.state_space:
@@ -117,10 +115,12 @@ class MetaWorldEnv:
             curr_st_id = self.get_state_id(curr_st)
             curr_st_l = list(curr_st)
             curr_time = curr_st_l[0]
-            # print("Curr state id : curr state :", curr_st_id,curr_st_l)
+            if self.verbose:
+                print("Curr state id : curr state :", curr_st_id, curr_st_l)
             for act in self.actions:
                 tm[curr_st_id][act - 1] = 0.00
-                # print("Action ", act)
+                if self.verbose:
+                    print("Action ", act)
                 next_st1_l = curr_st_l.copy()
                 next_st2_l = curr_st_l.copy()
                 next_st3_l = curr_st_l.copy()
@@ -147,15 +147,13 @@ class MetaWorldEnv:
                 next_st1 = tuple(next_st1_l)  # convert it into a tuple for the states list
                 assert (next_st1_l[0] == curr_st_l[0] + 1)
                 state_id = self.add_state(next_st1)  # append to the main set
-                # print("Adding : ",curr_st_id,state_id,next_st1_l,1.0 - t_prob)
+                if self.verbose:
+                    print("Adding : ", curr_st_id, state_id, next_st1_l, 1.0 - t_prob)
                 tm[curr_st_id][act - 1][state_id] = (1.0 - t_prob)
 
                 tmp.add(next_st1)  # append to the tmp set for loop
-                # log(curr_st)
-                log(next_st1)
 
                 if next_st2_l[index_last_action] + 1 < self.actions_per_plan:  # add only valid state
-                    log("Succ State-2 added")
                     last_action = next_st2_l[index_last_action]
                     next_st2_l[index_last_action] = next_st2_l[index_last_action] + 1  # next_action
                     next_st2_l[index_pt] = 0  # make the planning time = 0
@@ -175,14 +173,14 @@ class MetaWorldEnv:
                         next_st2 = tuple(next_st2i_l)  # convert it into a tuple for the states list
 
                         state_id = self.add_state(next_st2)
-                        # print("Adding - - : ",curr_st_id,state_id,next_st2i_l,t_prob * e_prob )
+                        if self.verbose:
+                            print("Adding - - : ", curr_st_id, state_id, next_st2i_l, t_prob * e_prob)
                         tm[curr_st_id][act - 1][state_id] = t_prob * e_prob
 
                         tmp.add(next_st2)  # append to the tmp list for loop
                         log(next_st2)
 
                 if next_st3_l[index_last_action] + 1 == self.actions_per_plan:  # add only valid state
-                    log("Succ State-2 added")
                     last_action = next_st3_l[index_last_action]
                     execution_time_so_far = next_st3_l[index_et]
 
@@ -198,17 +196,21 @@ class MetaWorldEnv:
                         next_st2 = tuple(next_st2i_l)  # convert it into a tuple for the states list
 
                         state_id = self.add_state(next_st2)
-                        # print("Adding -*- : ",curr_st_id,state_id,next_st2i_l,t_prob * e_prob )
+                        if self.verbose:
+                            print("Adding : ", curr_st_id, state_id, next_st2i_l, t_prob * e_prob)
                         tm[curr_st_id][act - 1][state_id] = t_prob * e_prob
 
                         tmp.add(next_st2)  # append to the tmp list for loop
                         log(next_st2)
+
+                # sanity checks
                 if abs(sum(tm[curr_st_id][act - 1]) - 0.0) < 0.001:
                     tm[curr_st_id][act - 1][curr_st_id] = 1.0
                 if self.is_terminal(curr_st_id) and abs(sum(tm[curr_st_id][act - 1]) - 0.0) < 0.001:
                     tm[curr_st_id][act - 1][curr_st_id] = 1.0
 
-    # this is very slow so need to come up with a better way
+    # TODO: this is very slow so need to come up with a better way
+    # returns copy of transition model (DEBUG CALL)
     def get_transition_model(self):
         n = self.num_of_states
         tm_tmp = np.zeros((n, self.num_of_plans, n), dtype="float")
@@ -218,6 +220,9 @@ class MetaWorldEnv:
                     tm_tmp[i][j][k] = float(f"{tm[i][j][k]}")
         return tm_tmp
 
+    # Take a step in the environment
+    # Arguments : State Id, Action
+    # Returns : Next State Ids, Transition Probs
     def step(self, st_id, action):
         assert (action in self.actions)
         assert (st_id in range(0, self.num_of_states))
@@ -228,12 +233,15 @@ class MetaWorldEnv:
         #     res[i] = self.transition_model[st_id][action - 1][i]
         #     ns.append(i)
         #     prob.append(res[i])
-        prob = list(self.transition_model[st_id][action-1])
+        prob = list(self.transition_model[st_id][action - 1])
         ns = [i for i in range(0, self.num_of_states)]
-        res = dict(zip(ns,prob))
+        res = dict(zip(ns, prob))
         return res, ns, prob
 
-    def step2(self, st_id, action):
+    # Take a step in the environment
+    # Arguments : State Id, Action
+    # Returns : Sampled Next State Id, Reward
+    def step_next_state(self, st_id, action):
         assert (action in self.actions)
         assert (st_id in range(0, self.num_of_states))
         res = {}
@@ -252,16 +260,9 @@ class MetaWorldEnv:
         curr_id = (random.choices(list1, weights=list2, k=1))[0]
         return curr_id, reward
 
-    def get_id_from_state(self, st):
-        key = {i for i in self.state_id_map if self.state_id_map[i] == st}
-        if len(key) > 0:
-            assert (len(key) == 1)
-            st_id = int(list(key)[0])
-            return st_id
-
-    def get_state_from_id(self, st_id):
-        return self.state_id_map[st_id]
-
+    # Checks if the state is terminal
+    # Arguments : State Id
+    # Returns : True if it's a terminal state
     def is_terminal(self, st_id):
         state = self.get_state_from_id(st_id)
         state_l = list(state)
@@ -271,13 +272,14 @@ class MetaWorldEnv:
             pt_invested = state_l[3 * j - 1]
             exec_time = state_l[3 * j]
             curr_time = state_l[0]
-            last_action_id = self.actions_per_plan-1
+            last_action_id = self.actions_per_plan - 1
             if curr_time > self.deadline:
                 return True
-            elif pt_invested > 0  and exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
+            elif pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
                 return True
         return False
 
+    # Creates an array of states and their termination status
     def set_terminal(self):
         arr = [False for i in range(0, self.num_of_states)]
         for i in range(0, self.num_of_states):
@@ -292,7 +294,7 @@ class MetaWorldEnv:
                 last_action_id = self.actions_per_plan - 1
                 if curr_time > self.deadline:
                     arr[i] = True
-                elif pt_invested > 0 and exec_time > 0  and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
+                elif pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
                     arr[i] = True
 
         return arr
@@ -327,6 +329,28 @@ class MetaWorldEnv:
         model = np.array(data)
         return model
 
+    # Calculates the Reward of being in a state
+    # Argument : State Id
+    # Returns : Reward
+    def reward_function(self, state_id):
+        state = self.get_state_from_id(state_id)
+        state_l = list(state)
+        r = 0.0
+        for j in range(1, self.num_of_plans + 1):
+            plan_id = j - 1
+            last_refined_action = state_l[3 * j - 2]
+            pt_invested = state_l[3 * j - 1]
+            exec_time = state_l[3 * j]
+            last_action_id = self.actions_per_plan - 1
+
+            t_prob = self.planning_dist[plan_id][last_action_id][pt_invested]
+            curr_time = state_l[0]
+
+            if pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
+                r = r + 100
+        return r
+
+    # To check if the transition matrix is stochastic (DEBUG CALL)
     def is_stochastic(self):
         n = self.num_of_states
         for i in range(0, n):
@@ -341,14 +365,23 @@ class MetaWorldEnv:
     def print_for_me(self):
         print(self.planning_dist)
 
-
     def successStates(self):
         n = 0
         p = 0
         for i in range(0, self.num_of_states):
             if self.reward_model[i] > 0:
-                n = n+1
+                n = n + 1
             if self.terminal_state[i]:
                 p = p + 1
 
-        return n,p,self.num_of_states
+        return n, p, self.num_of_states
+
+    def get_id_from_state(self, st):
+        key = {i for i in self.state_id_map if self.state_id_map[i] == st}
+        if len(key) > 0:
+            assert (len(key) == 1)
+            st_id = int(list(key)[0])
+            return st_id
+
+    def get_state_from_id(self, st_id):
+        return self.state_id_map[st_id]

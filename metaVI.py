@@ -13,8 +13,9 @@ from metaEnv import MetaWorldEnv
 
 
 class MetaReasoningWorld:
-    def __init__(self, env):
+    def __init__(self, env, verbose):
         self.env = env
+        self.verbose = verbose
 
     def do_value_iteration(self, max_iterations):
         start_time = time.time()
@@ -31,6 +32,8 @@ class MetaReasoningWorld:
         i = 0
 
         for i in range(max_iter):
+            if self.verbose:
+                print("Iteration : ",i)
             max_diff = 0  # Initialize max difference
             Value_Table_New = np.zeros((n), dtype="float")
 
@@ -79,7 +82,6 @@ class MetaReasoningWorld:
         policy = []
         state_path = []
         cost = 0.0
-        i = 1
         while True:
             state_path.append(self.env.get_state_from_id(curr_id))
             curr_state_ls = list(self.env.get_state_from_id(curr_id))
@@ -87,12 +89,10 @@ class MetaReasoningWorld:
             next_action = pi[curr_id]
             policy.append(next_action)
             res, _, _ = self.env.step(curr_id, next_action)
-            if (self.env.done(curr_id)):
+            if self.env.done(curr_id):
                 break
             list1 = list(res.keys())
             list2 = list(res.values())
-            random.seed(i+78)
-            i=i+1
             curr_id = (random.choices(list1, weights=list2, k=1))[0]
         policy.pop()
         return policy, state_path, cost
@@ -103,18 +103,18 @@ class MetaReasoningWorld:
         st_id = self.env.get_id_from_state(start)
         t = 0
         curr_id = st_id
-        cost = 0.0
+        total_reward = 0.0
         index = -1
         state_path = []
         while index < len(p)-1:
             index = index + 1
             state_path.append(self.env.get_state_from_id(curr_id))
-            cost = cost + self.env.reward_model[curr_id]
+            total_reward = total_reward + self.env.reward_model[curr_id]
             next_action = p[index]
             res, _, _ = self.env.step(curr_id, next_action)
             list1 = list(res.keys())
             list2 = list(res.values())
             curr_id = (random.choices(list1, weights=list2, k=1))[0]
 
-        return state_path,cost
+        return state_path, total_reward
 

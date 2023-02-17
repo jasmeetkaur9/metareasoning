@@ -31,8 +31,8 @@ if __name__ == "__main__":
         e_dist, e_times = get_execution_distributions(num_of_plans, actions_per_plan, max_execution_time=3)
         # print(dist)
         # print(e_dist)
-        env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time, False,
-                           dist,planning_times,e_dist,e_times)
+        env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time, False)
+                           #dist,planning_times,e_dist,e_times)
         mw = MetaReasoningWorld(env,False)
 
         # Print the number of successful terminal states, total terminal states, total states

@@ -19,13 +19,13 @@ if __name__ == "__main__":
     cost_values = np.zeros((max_iter + 2, samples + 1), dtype="float")
     ctime = np.zeros((max_iter + 2, samples + 1), dtype="float")
     for sample_num in range(0, samples):
-        print("SAMPLE : ", sample_num)
+        print("SAMPLE : ", sample_num+1)
         m = [5, 10, 5]
         v = [2, 1, 3]
         num_of_plans = 2
         actions_per_plan = 2
         max_planning_time = np.array([3, 3])
-        deadline = 6
+        deadline = 8
         actions = [1, 2]
         dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
         e_dist, e_times = get_execution_distributions(num_of_plans, actions_per_plan, max_execution_time=3)
@@ -38,10 +38,10 @@ if __name__ == "__main__":
         # Print the number of successful terminal states, total terminal states, total states
         # print(env.successStates())
         # Print the distribution
-        env.print_for_me()
+        # env.print_for_me()
 
         print("DO Value Iteration")
-        # You can make a call to the metaVI
+        # Make a call to the metaVI
         # Call to run VI
         st_time = time.time()
         its, v, p, t = mw.do_value_iteration(100)

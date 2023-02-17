@@ -25,7 +25,7 @@ if __name__ == "__main__":
         num_of_plans = 2
         actions_per_plan = 2
         max_planning_time = np.array([3, 3])
-        deadline = 8
+        deadline = 8 # 6
         actions = [1, 2]
         dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
         e_dist, e_times = get_execution_distributions(num_of_plans, actions_per_plan, max_execution_time=3)

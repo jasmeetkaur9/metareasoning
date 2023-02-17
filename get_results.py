@@ -75,7 +75,7 @@ if __name__ == "__main__":
             s.append(reward)
         total_reward = total_reward / runs
         print(np.mean(s))
-        print(np.std(s))
+        # print(np.std(s))
         # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
 
         print("DO MCTS")
@@ -118,5 +118,5 @@ if __name__ == "__main__":
             # cost_values[k][sample_num] = np.mean(s)
         for i in range(0, len(list_k)):
             print(list_k[i])
-        for i in range(0, len(list_k)):
-            print(list_k_sd[i])
+        # for i in range(0, len(list_k)):
+        #     print(list_k_sd[i])

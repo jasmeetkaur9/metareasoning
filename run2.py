@@ -38,7 +38,7 @@ def get_single_distribution(max_planning_time_, mean, variance,padding,mpt):
 
 
 def get_distributions(num_of_plans, num_of_actions, max_planning_time, mean, variance):
-    padding = 10
+    padding = 3
     mpt = max(max_planning_time)
     dist = np.zeros((num_of_plans, num_of_actions, mpt + padding), dtype="float")
     planning_times = np.zeros((num_of_plans, num_of_actions), dtype="int")
@@ -88,8 +88,7 @@ if __name__ == "__main__":
             e_dist, e_times = get_execution_distributions(num_of_plans,actions_per_plan,max_execution_time=3)
             # print(dist)
             # print(e_dist)
-            env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time,
-                               dist,planning_times,e_dist,e_times)
+            env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time)
             mw = MetaReasoningWorld(env)
             print(env.successStates())
 

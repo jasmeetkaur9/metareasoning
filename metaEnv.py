@@ -36,10 +36,15 @@ tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 #                 [[0.31282752, 0.30373012, 0.38344236],
 #                  [0.34851941, 0.30160948, 0.34987111]]]
 
-DEFAULT_DIST2 = [[[0.072, 0.501, 0.904, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.   ],
-                [0.037, 0.333, 0.821, 0.986, 1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,    1. ]],
-                [[0.014, 0.19,  0.717, 0.981, 1.,    1.,    1.,    1.,    1.,    1.,    1,  1.,    1.   ],
-                [0.016, 0.702, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,   1.,    1.    ]]]
+# DEFAULT_DIST2 = [[[0.072, 0.501, 0.904, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.   ],
+#                 [0.037, 0.333, 0.821, 0.986, 1.,    1.,    1.,    1.,    1.,    1.,    1.,  1.,    1.,    1. ]],
+#                 [[0.014, 0.19,  0.717, 0.981, 1.,    1.,    1.,    1.,    1.,    1.,    1,  1.,    1.   ],
+#                 [0.016, 0.702, 1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,    1.,   1.,    1.    ]]]
+
+DEFAULT_DIST2 = [[[0.072, 0.501, 0.904, 1.,    1.],
+                [0.037, 0.333, 0.821, 0.986, 1.]],
+                [[0.014, 0.19,  0.717, 0.981, 1. ],
+                [0.016, 0.702, 1.,    1.,    1. ]]]
 
 DEFAULT_TIMES2 = [[3, 3],
                   [4, 2]]
@@ -141,7 +146,7 @@ class MetaWorldEnv:
                 last_refined_action = next_st1_l[
                     index_last_action]  # next symbolic action to transition depends on action
                 pt_invested = next_st1_l[index_pt]
-                t_prob = self.planning_dist[act - 1][last_refined_action][pt_invested]
+                t_prob = self.get_t_prob(act,last_refined_action,pt_invested)
 
                 next_st1_l[index_pt] = next_st1_l[index_pt] + 1  # increase planning time for the first state
                 next_st1 = tuple(next_st1_l)  # convert it into a tuple for the states list
@@ -312,8 +317,6 @@ class MetaWorldEnv:
                 pt_invested = state_l[3 * j - 1]
                 exec_time = state_l[3 * j]
                 last_action_id = self.actions_per_plan - 1
-
-                t_prob = self.planning_dist[plan_id][last_action_id][pt_invested]
                 curr_time = state_l[0]
 
                 if pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
@@ -352,3 +355,11 @@ class MetaWorldEnv:
                 p = p + 1
 
         return n,p,self.num_of_states
+
+    def get_t_prob(self,act,last_refined_action,pt_invested):
+        max_planning_time = len(self.planning_dist[act - 1][last_refined_action])
+        if pt_invested >= max_planning_time:
+            return 1.0
+        else :
+            return self.planning_dist[act - 1][last_refined_action][pt_invested]
+

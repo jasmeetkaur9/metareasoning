@@ -120,6 +120,3 @@ if __name__ == "__main__":
             print(list_k[i])
         for i in range(0, len(list_k)):
             print(list_k_sd[i])
-    avg = []
-    moving_avg = []
-    std = []

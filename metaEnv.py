@@ -20,7 +20,7 @@ def log(s):
         print(s)
 
 
-MAX_STATES = 30000
+MAX_STATES = 38000
 num = 2
 tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 

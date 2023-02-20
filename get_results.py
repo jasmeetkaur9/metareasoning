@@ -1,4 +1,6 @@
+#!/scratch/cluster/jkaur/anaconda3/envs/planning/bin/python
 from __future__ import division
+import sys
 import numpy as np
 import time
 import random
@@ -14,7 +16,8 @@ import matplotlib.pyplot as plt
 import scipy.stats as st
 
 if __name__ == "__main__":
-    samples = 1
+    iter_input = int(sys.argv[1])
+    samples = 5
     max_iter = 1000
     cost_values = np.zeros((max_iter + 2, samples + 1), dtype="float")
     ctime = np.zeros((max_iter + 2, samples + 1), dtype="float")
@@ -24,15 +27,15 @@ if __name__ == "__main__":
         v = [2, 1, 3]
         num_of_plans = 2
         actions_per_plan = 2
-        max_planning_time = np.array([3, 3])
-        deadline = 8 # 6
+        max_planning_time = np.array([10, 10])
+        deadline = 20 # 6
         actions = [1, 2]
         dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
         e_dist, e_times = get_execution_distributions(num_of_plans, actions_per_plan, max_execution_time=3)
-        # print(dist)
-        # print(e_dist)
-        env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time, False)
-                           #dist,planning_times,e_dist,e_times)
+        print(dist)
+        print(e_dist)
+        env = MetaWorldEnv(num_of_plans, actions_per_plan, deadline, actions, max_planning_time, False,
+                           dist,planning_times,e_dist,e_times)
         mw = MetaReasoningWorld(env,False)
 
         # Print the number of successful terminal states, total terminal states, total states
@@ -83,7 +86,7 @@ if __name__ == "__main__":
         list_k_sd = []
 
         # k is the number of rollout iterations
-        for k in [8000]:
+        for k in [iter_input]:
             num_of_trials = 100
             total_reward = 0.0
             s = []
@@ -118,5 +121,5 @@ if __name__ == "__main__":
             # cost_values[k][sample_num] = np.mean(s)
         for i in range(0, len(list_k)):
             print(list_k[i])
-        # for i in range(0, len(list_k)):
-        #     print(list_k_sd[i])
+        for i in range(0, len(list_k)):
+            print(list_k_sd[i])

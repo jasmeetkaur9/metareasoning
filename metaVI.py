@@ -1,3 +1,4 @@
+#!/scratch/cluster/jkaur/anaconda3/envs/planning/bin/python
 from __future__ import division
 from copy import deepcopy
 from functools import reduce

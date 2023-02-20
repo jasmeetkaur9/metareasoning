@@ -1,3 +1,4 @@
+#!/scratch/cluster/jkaur/anaconda3/envs/planning/bin/python
 from __future__ import division
 from copy import deepcopy
 from functools import reduce
@@ -19,7 +20,7 @@ def log(s):
         print(s)
 
 
-MAX_STATES = 20000
+MAX_STATES = 30000
 num = 2
 tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 

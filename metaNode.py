@@ -1,3 +1,4 @@
+#!/scratch/cluster/jkaur/anaconda3/envs/planning/bin/python
 class Node:
     def __init__(self, state):
         self.state = state

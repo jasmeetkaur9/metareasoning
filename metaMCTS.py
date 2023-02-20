@@ -1,3 +1,4 @@
+#!/scratch/cluster/jkaur/anaconda3/envs/planning/bin/python
 import metaNode as nd
 import numpy as np
 import random

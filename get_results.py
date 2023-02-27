@@ -42,7 +42,7 @@ if __name__ == "__main__":
         # Print the distribution
         # env.print_for_me()
 
-        print("DO Value Iteration")
+        print("DO VALUE ITERATION")
         # Make a call to the metaVI
         # Call to run VI
         st_time = time.time()
@@ -80,6 +80,7 @@ if __name__ == "__main__":
         # print(np.std(s))
         # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
 
+        print("DO ROUND ROBIN")
         # Do Round Robin
         for time_steps in range(1,deadline+1):
             p = round_robin_policy(time_steps, 1, actions, 100)
@@ -94,6 +95,7 @@ if __name__ == "__main__":
             total_reward = total_reward / runs
             print(np.mean(s))
 
+        print("DO RANDOM")
         # Do Random
         p = random_policy(actions, 100)
         # Calculate the Expected Reward
@@ -113,7 +115,7 @@ if __name__ == "__main__":
 
         # k is the number of rollout iterations
         for k in [8000]:
-            num_of_trials = 100
+            num_of_trials = 1000
             total_reward = 0.0
             s = []
             for i in range(0, num_of_trials):

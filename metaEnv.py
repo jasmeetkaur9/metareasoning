@@ -20,7 +20,7 @@ def log(s):
         print(s)
 
 
-MAX_STATES = 35000
+MAX_STATES = 38000
 num = 2
 tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 
@@ -37,20 +37,32 @@ tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 #                 [[0.31282752, 0.30373012, 0.38344236],
 #                  [0.34851941, 0.30160948, 0.34987111]]]
 
-DEFAULT_DIST2 = [[[0.072, 0.501, 0.904, 1., 1.],
-                  [0.037, 0.333, 0.821, 0.986, 1.]],
-                 [[0.014, 0.19, 0.717, 0.981, 1.],
-                  [0.016, 0.702, 1., 1., 1.]]]
-
-DEFAULT_TIMES2 = [[3, 3],
-                  [4, 2]]
-DEFAULT_EDIST = [[[0.24015373, 0.45464654, 0.30519973],
-                  [0.34614808, 0.3474152, 0.30643672]],
-
-                 [[0.31282752, 0.30373012, 0.38344236],
-                  [0.34851941, 0.30160948, 0.34987111]]]
-
+# DEFAULT_DIST2 = [[[0.072, 0.501, 0.904, 1., 1.],
+#                   [0.037, 0.333, 0.821, 0.986, 1.]],
+#                  [[0.014, 0.19, 0.717, 0.981, 1.],
+#                   [0.016, 0.702, 1., 1., 1.]]]
+#
+# DEFAULT_TIMES2 = [[3, 3],
+#                   [4, 2]]
+# DEFAULT_EDIST = [[[0.24015373, 0.45464654, 0.30519973],
+#                   [0.34614808, 0.3474152, 0.30643672]],
+#
+#                  [[0.31282752, 0.30373012, 0.38344236],
+#                   [0.34851941, 0.30160948, 0.34987111]]]
+#
 DEFAULT_ETIMES = np.array([[2, 2], [2, 2]])
+
+DEFAULT_DIST2 = [[[0.0133, 0.1066, 0.44, 0.693, 0.88, 0.933, 0.9733, 0.9866, 1.0, 1.0]],
+                 [[0.003, 0.004, 0.0153, 0.03076, 0.04615, 0.0615, 0.0923, 0.1384, 0.1692, 0.1896]]]
+
+DEFAULT_TIMES2 = [[8],
+                  [10]]
+
+DEFAULT_EDIST = [[[0.15102481, 0.18911111, 0.19425454, 0.20046504, 0.14918604, 0.11595846]],
+
+                 [[0.19869356, 0.22350258, 0.17317389, 0.14260042, 0.13689311,  0.12513644]]]
+
+DEFAULT_ETIMES = np.array([[5], [5]])
 
 
 class MetaWorldEnv:
@@ -141,7 +153,6 @@ class MetaWorldEnv:
                 pt_invested = next_st1_l[index_pt]
                 exec_time = curr_st_l[index_et]
                 t_prob = self.get_t_prob(act,last_refined_action,pt_invested)
-
                 next_st1_l[index_pt] = next_st1_l[index_pt] + 1  # increase planning time for the first state
                 next_st1 = tuple(next_st1_l)  # convert it into a tuple for the states list
                 assert (next_st1_l[0] == curr_st_l[0] + 1)
@@ -201,7 +212,6 @@ class MetaWorldEnv:
 
                         tmp.add(next_st2)  # append to the tmp list for loop
                         log(next_st2)
-
                 # sanity checks
                 if abs(sum(tm[curr_st_id][act - 1]) - 0.0) < 0.001:
                     tm[curr_st_id][act - 1][curr_st_id] = 1.0

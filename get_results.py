@@ -83,6 +83,7 @@ if __name__ == "__main__":
         # print(np.std(s))
         # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
 
+        print("Do Round Robin")
         # Do Round Robin
         for time_steps in range(1, deadline + 1):
             p = round_robin_policy(time_steps, 1, actions, 100)
@@ -97,6 +98,7 @@ if __name__ == "__main__":
             total_reward = total_reward / runs
             print(np.mean(s))
 
+        print("Do Random")
         # Do Random
         p = random_policy(actions, 100)
         # Calculate the Expected Reward
@@ -110,7 +112,6 @@ if __name__ == "__main__":
         total_reward = total_reward / runs
         print(np.mean(s))
 
-        break
         print("DO MCTS")
         list_k = []
         list_k_sd = []

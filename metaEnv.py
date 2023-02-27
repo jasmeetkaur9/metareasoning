@@ -52,13 +52,13 @@ tm = np.zeros((MAX_STATES, num, MAX_STATES), dtype="float")
 #
 DEFAULT_ETIMES = np.array([[2, 2], [2, 2]])
 
-DEFAULT_DIST2 = [[[0.0133, 0.1066, 0.44, 0.693, 0.88, 0.933, 0.9733, 0.9866, 1.0, 1.0]],
+DEFAULT_DIST2 = [[[0.0133, 0.44, 0.693, 0.88, 0.933, 0.9733, 0.9866, 1.0, 1.0, 1.0]],
                  [[0.003, 0.004, 0.0153, 0.03076, 0.04615, 0.0615, 0.0923, 0.1384, 0.1692, 0.1896]]]
 
 DEFAULT_TIMES2 = [[8],
                   [10]]
 
-DEFAULT_EDIST = [[[0.15102481, 0.18911111, 0.19425454, 0.20046504, 0.14918604, 0.11595846]],
+DEFAULT_EDIST = [[[0.11595846, 0.15102481, 0.14918604, 0.18911111, 0.19425454, 0.20046504]],
 
                  [[0.19869356, 0.22350258, 0.17317389, 0.14260042, 0.13689311,  0.12513644]]]
 
@@ -175,7 +175,7 @@ class MetaWorldEnv:
                     next_st2i_l = next_st2_l.copy()
                     met_last_action = self.execution_times[act - 1][last_action]
 
-                    for exec_time in range(0, met_last_action + 1):
+                    for exec_time in range(1, met_last_action + 1):
                         e_prob = self.execution_dist[act - 1][last_refined_action][exec_time]
 
                         next_st2i_l = next_st2_l.copy()
@@ -197,7 +197,7 @@ class MetaWorldEnv:
                     next_st2i_l = next_st3_l.copy()
                     met_last_action = self.execution_times[act - 1][last_action]
 
-                    for exec_time in range(0, met_last_action + 1):
+                    for exec_time in range(1, met_last_action + 1):
                         e_prob = self.execution_dist[act - 1][last_refined_action][exec_time]
 
                         next_st2i_l = next_st3_l.copy()

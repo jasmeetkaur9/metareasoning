@@ -51,3 +51,27 @@ def get_execution_distributions(num_of_plans, num_of_actions, max_execution_time
             e_planning_times[i][j] = max_execution_time - 1
 
     return e_dist, e_planning_times
+
+def round_robin_policy(time_steps,starting_plan,plans,max_time):
+    p = []
+    p.append(starting_plan)
+    last_plan = starting_plan
+    plan_index = 0
+    total_plans = len(plans)
+    for i in range(1,max_time):
+        if i%time_steps == 0:
+            plan_index = plan_index+1
+            plan_index = plan_index % total_plans
+            next_plan = plans[plan_index]
+            p.append(next_plan)
+            last_plan = next_plan
+        else :
+            p.append(last_plan)
+    return p
+
+def random_policy(plans,max_time):
+    p = []
+    for i in range(0,max_time):
+        random_plan = np.random.choice(plans)
+        p.append(random_plan)
+    return p

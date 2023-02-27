@@ -10,6 +10,8 @@ from metaMCTS import MCTS
 import metaNode as nd
 from metaUtility import get_distributions
 from metaUtility import get_execution_distributions
+from metaUtility import random_policy
+from metaUtility import round_robin_policy
 import matplotlib.pyplot as plt
 import scipy.stats as st
 
@@ -25,7 +27,7 @@ if __name__ == "__main__":
         num_of_plans = 2
         actions_per_plan = 2
         max_planning_time = np.array([3, 3])
-        deadline = 8 # 6
+        deadline = 5 # 6
         actions = [1, 2]
         dist, planning_times = get_distributions(num_of_plans, actions_per_plan, max_planning_time, m, v)
         e_dist, e_times = get_execution_distributions(num_of_plans, actions_per_plan, max_execution_time=3)
@@ -67,7 +69,7 @@ if __name__ == "__main__":
 
         # Calculate the Expected Reward
         total_reward = 0.0
-        runs = 100
+        runs = 1000
         s = []
         for i in range(0, runs):
             pp, state_path, reward = mw.get_policy_from_path(p)
@@ -77,6 +79,33 @@ if __name__ == "__main__":
         print(np.mean(s))
         # print(np.std(s))
         # print(st.t.interval(confidence=0.95, df=len(s) - 1, loc=np.mean(s), scale=st.sem(s)))
+
+        # Do Round Robin
+        for time_steps in range(1,deadline+1):
+            p = round_robin_policy(time_steps, 1, actions, 100)
+            # Calculate the Expected Reward
+            total_reward = 0.0
+            runs = 1000
+            s = []
+            for i in range(0, runs):
+                state_path, reward = mw.get_solution_using_policy(p)
+                total_reward = total_reward + reward
+                s.append(reward)
+            total_reward = total_reward / runs
+            print(np.mean(s))
+
+        # Do Random
+        p = random_policy(actions, 100)
+        # Calculate the Expected Reward
+        total_reward = 0.0
+        runs = 1000
+        s = []
+        for i in range(0, runs):
+            state_path, reward = mw.get_solution_using_policy(p)
+            total_reward = total_reward + reward
+            s.append(reward)
+        total_reward = total_reward / runs
+        print(np.mean(s))
 
         print("DO MCTS")
         list_k = []

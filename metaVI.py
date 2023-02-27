@@ -112,6 +112,8 @@ class MetaReasoningWorld:
             total_reward = total_reward + self.env.reward_model[curr_id]
             next_action = p[index]
             res, _, _ = self.env.step(curr_id, next_action)
+            if self.env.done(curr_id):
+                break
             list1 = list(res.keys())
             list2 = list(res.values())
             curr_id = (random.choices(list1, weights=list2, k=1))[0]

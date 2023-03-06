@@ -4,18 +4,15 @@ import sys
 import numpy as np
 import time
 import random
-import operator
 import mdptoolbox
-from metaVI import MetaReasoningWorld
-from metaEnv import MetaWorldEnv
-from metaMCTS import MCTS
-import metaNode as nd
-from metaUtility import get_distributions
-from metaUtility import get_execution_distributions
-from metaUtility import round_robin_policy
-from metaUtility import random_policy
-import matplotlib.pyplot as plt
-import scipy.stats as st
+from valueiteration.metaVI import MetaReasoningWorld
+from envs.metaEnv import MetaWorldEnv
+from mcts.metaMCTS import MCTS
+from mcts import metaNode as nd
+from utility.metaUtility import get_distributions
+from utility.metaUtility import get_execution_distributions
+from utility.metaUtility import round_robin_policy
+from utility.metaUtility import random_policy
 
 if __name__ == "__main__":
     iter_input = int(sys.argv[1])

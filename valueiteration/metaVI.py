@@ -1,16 +1,8 @@
 #!/scratch/cluster/jkaur/anaconda3/envs/planning/bin/python
 from __future__ import division
-from copy import deepcopy
-from functools import reduce
 import numpy as np
-from itertools import count
-from collections import defaultdict
-import collections
 import time
 import random
-import operator
-import mdptoolbox
-from metaEnv import MetaWorldEnv
 
 
 class MetaReasoningWorld:

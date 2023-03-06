@@ -1,3 +1,4 @@
+#!/scratch/cluster/jkaur/anaconda3/envs/planning/bin/python
 class Node:
     def __init__(self, state):
         self.state = state
@@ -6,7 +7,7 @@ class Node:
         self.ressq = 0.0
         self.parent = None
         self.children = []
-        self.sputc = 0.0
+        self.utc = 0.0
 
     def SetWeight(self, weight):
         self.weight = weight

@@ -201,6 +201,26 @@ class MetaWorldEnv_v2:
             transition_prob.append(1.0)
         return dict(zip(state_id, transition_prob))
 
+    # Calculates the Reward of being in a state
+    # Argument : State Id
+    # Returns : Reward
+    def reward_function(self, state_id):
+        state = self.get_state_from_id(state_id)
+        state_l = list(state)
+        r = 0.0
+        for j in range(1, self.num_of_plans + 1):
+            plan_id = j - 1
+            last_refined_action = state_l[3 * j - 2]
+            pt_invested = state_l[3 * j - 1]
+            exec_time = state_l[3 * j]
+            last_action_id = self.actions_per_plan - 1
+
+            t_prob = self.planning_dist[plan_id][last_action_id][pt_invested]
+            curr_time = state_l[0]
+
+            if pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
+                r = r + 100
+        return r
 
     # Take a step in the environment
     # Arguments : State Id, Action
@@ -261,72 +281,8 @@ class MetaWorldEnv_v2:
                 return True
         return False
 
-    # Creates an array of states and their termination status
-    def set_terminal(self):
-        arr = [False for i in range(0, self.num_of_states)]
-        for i in range(0, self.num_of_states):
-            state = self.get_state_from_id(i)
-            state_l = list(state)
-            for j in range(1, self.num_of_plans + 1):
-                plan_id = j - 1
-                last_refined_action = state_l[3 * j - 2]
-                pt_invested = state_l[3 * j - 1]
-                exec_time = state_l[3 * j]
-                curr_time = state_l[0]
-                last_action_id = self.actions_per_plan - 1
-                if curr_time > self.deadline:
-                    arr[i] = True
-                elif pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_action_id == last_refined_action:
-                    arr[i] = True
-        return arr
-
     def done(self, st_id):
-        return self.terminal_state[st_id]
-
-    def get_reward_table(self):
-        reward = {}
-        for i in range(0, self.num_of_states):
-            state = self.get_state_from_id(i)
-            state_l = list(state)
-            r = 0.0
-            for j in range(1, self.num_of_plans + 1):
-                plan_id = j - 1
-                last_refined_action = state_l[3 * j - 2]
-                pt_invested = state_l[3 * j - 1]
-                exec_time = state_l[3 * j]
-                last_action_id = self.actions_per_plan - 1
-                curr_time = state_l[0]
-                if pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
-                    r = 100
-            reward[i] = r
-        return reward
-
-    def get_reward_model(self):
-        result = self.reward.values()
-        data = list(result)
-        model = np.array(data)
-        return model
-
-    # Calculates the Reward of being in a state
-    # Argument : State Id
-    # Returns : Reward
-    def reward_function(self, state_id):
-        state = self.get_state_from_id(state_id)
-        state_l = list(state)
-        r = 0.0
-        for j in range(1, self.num_of_plans + 1):
-            plan_id = j - 1
-            last_refined_action = state_l[3 * j - 2]
-            pt_invested = state_l[3 * j - 1]
-            exec_time = state_l[3 * j]
-            last_action_id = self.actions_per_plan - 1
-
-            t_prob = self.planning_dist[plan_id][last_action_id][pt_invested]
-            curr_time = state_l[0]
-
-            if pt_invested > 0 and exec_time > 0 and curr_time + exec_time <= self.deadline and last_refined_action == last_action_id:
-                r = r + 100
-        return r
+        return self.is_terminal(st_id)
 
     def get_t_prob(self, act, last_refined_action, pt_invested):
         max_planning_time = len(self.planning_dist[act - 1][last_refined_action])

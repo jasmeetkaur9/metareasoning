@@ -1,0 +1,8 @@
+env : "CartPole-v0"
+episodes : "1"
+rollout_iterations : "2000"
+lookahead_target : "100"
+max_episode_steps : "1500"
+cp : "10"
+seed : "20"
+video_basepath : "log"

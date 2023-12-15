@@ -2,23 +2,29 @@ import os
 import time
 import random
 import argparse
+import numpy as np
 
 import gym
 from gym.wrappers.monitoring.video_recorder import VideoRecorder
 from omegaconf import OmegaConf 
 
-from methods.mcts.mcts import MCTSAgent
-from utils.utils import initialize
+from methods.mcts.mcts import MCTSAgent, Node
+from envs.metaenv import MetaWorldEnv
+from utils.utils import initialize, plot_graph
 
 
-
+# TODO : Need to make it compatible with both envs
 
 if __name__ == '__main__':
+    initialize()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config_file")
+    args = parser.parse_args()
+    config = args.config_file
 
-    params = OmegaConf.load("/home/jk49379/metareasoning/config/metaenv.yml")
-    env = gym.make(params.env)
-    _, _ = env.reset(seed = int(params.seed))
-
+    params = OmegaConf.load(config)
+    env = gym.make(params.env, params = params)
+    curr_state, _ = env.reset()
     if params.verbose == "True":
         while True:
             action = 0
@@ -34,21 +40,17 @@ if __name__ == '__main__':
     episodes = int(params.episodes)
     max_episode_steps = int(params.max_episode_steps)
     timestr = time.strftime("%Y-%m-%d")
-    avg_reward = 0
-
+    avg_reward = []
+    episode_reward = []
 
     for i in range(int(params.episodes)):
-        ob = env.reset()
+        curr_state, _ = env.reset()
         env._max_episode_steps = max_episode_steps
-        video_path = os.path.join(
-            params.video_basepath, f"output_{timestr}_{i}.mp4")
-        rec = VideoRecorder(env, path=video_path)
         sum_reward = 0
-        node = None
+        node = Node(False, 0, curr_state)
         all_nodes = []
         cp = int(params.cp)
-        
-        
+        path = []
         while True:
             path.append(curr_state)
             action, node, cp = agent.run(params, node)
@@ -60,17 +62,12 @@ if __name__ == '__main__':
             sum_reward = sum_reward + reward
             if done:
                 break
-        avg_reward = avg_reward + sum_reward
-        
-        
+        episode_reward.append(sum_reward)
+        avg_reward.append(np.mean(np.array(episode_reward)))
         if params.verbose == "True":
             print("Solution Path Found", sum_reward)
             for i in range(0, len(path)):
                 print(env.get_state_from_id(path[i]))
-
-    trials = int(params.episodes)
-    avg_reward = avg_reward/trials
-    print(avg_reward)
-
+    
+    plot_graph(avg_reward, "Reward", "reward_score")
         
-            

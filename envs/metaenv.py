@@ -58,8 +58,6 @@ def transform_input(planning_dist, exec_dist) :
                 if(abs(execution_input[plan][action] - 0.0) < 0.0001):
                     execution_input[plan][action] = 1000
 
-    print("Transformed Input :", planning_input, execution_input)
-
     return planning_input, execution_input
 
 MAX_STATES = 10000
@@ -93,7 +91,7 @@ class MetaWorldEnv(gym.Env):
         start = tuple([0] * shape_of_tuple)
         st_id = self.add_state(start)
         self.curr_state = st_id
-        return st_id
+        return st_id, {}
 
 
     def add_state(self, state):

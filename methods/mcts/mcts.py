@@ -4,7 +4,9 @@ import numpy as np
 import math
 
 
+""" MCTS Agent : Works in state space created based on only node id for MetaWorld
 
+"""
 
 class Node :
     id_iter = itertools.count()
@@ -85,10 +87,18 @@ class MCTSAgent :
     def expand(self, node):
         remaining_actions = list(filter(lambda action : not action in node.children.keys(), range(self.actions)))
         a = random.choice(remaining_actions)
+        if self.agent_type == 1 :
+            curr_id = node.id
+            curr_state = self.env.observation_space.get_state_from_id(curr_id)
+        else :
+            curr_id = 0
+            curr_state = self.env.observation_space.get_state_from_id(curr_id)
 
         if self.agent_type == 1:
-            next_state, reward, _, done, info = self.env.step_mw(a, node.id)
-            child_node = Node(done, node.depth+1, next_state)
+            next_state, next_id, reward, _, done, info  = self.env.step_mw(a, curr_state)
+            curr_state = next_state
+            curr_id = next_id
+            child_node = Node(done, node.depth+1, next_id)
         else :
             obs, reward, _, done, info  = self.env.step(a)
             child_node = Node(done, node.depth+1)
@@ -113,13 +123,14 @@ class MCTSAgent :
     def random_policy(self, node):
         done = node.done
         total_reward = 0
-        curr_state = node.id
-        
+        curr_id = node.id
+        curr_state = self.env.observation_space.get_state_from_id(curr_id)
         while not done:
             random_action =  random.choice(np.arange(self.actions))
             if self.agent_type == 1:
-                next_state, reward, _, done, info = self.env.step_mw(random_action, curr_state)
+                next_state, next_id, reward, _, done, info  = self.env.step_mw(random_action, curr_state)
                 curr_state = next_state
+                curr_id = next_id
     
             else :
                 obs, reward, _, done, info  = self.env.step(random_action)

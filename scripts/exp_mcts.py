@@ -28,8 +28,8 @@ if __name__ == '__main__':
     if params.verbose == "True":
         while True:
             action = 0
-            next_state, reward, _, done, info  = env.step_mw(action, curr_state)
-            print(curr_state," : ", env.get_state_from_id(curr_state), next_state, " : ", env.get_state_from_id(next_state), reward, done)
+            next_state, next_id, reward, _, done, info  = env.step_mw(action, curr_state)
+            print(curr_state," : ", curr_state, next_state, " : ", next_state, reward, done)
             curr_state = next_state
             if done:
                 break
@@ -42,21 +42,31 @@ if __name__ == '__main__':
     timestr = time.strftime("%Y-%m-%d")
     avg_reward = []
     episode_reward = []
+    if params.env == "MetaWorld-v1":
+        agent_type = 1
+    else :
+        agent_type = 0
 
     for i in range(int(params.episodes)):
-        curr_state, _ = env.reset()
+        if agent_type == 1:
+            curr_state, info = env.reset()
+            curr_id = env.observation_space.get_state_id(curr_state)
+            curr = curr_id
+        else :
+            curr, info = env.reset()
         env._max_episode_steps = max_episode_steps
         sum_reward = 0
-        node = Node(False, 0, curr_state)
+        node = Node(False, 0, curr)
         all_nodes = []
         cp = int(params.cp)
         path = []
         while True:
             path.append(curr_state)
             action, node, cp = agent.run(params, node)
-            if params.env == "MetaWorld-v1":
-                next_state, reward, _, done, info  = env.step_mw(action, curr_state)
+            if agent_type == 1:
+                next_state, next_id, reward, _, done, info  = env.step_mw(action, curr_state)
                 curr_state = next_state
+                curr_id = next_id
             else :
                 next_state, reward, _, done, info  = env.step(action)
             sum_reward = sum_reward + reward
@@ -67,7 +77,7 @@ if __name__ == '__main__':
         if params.verbose == "True":
             print("Solution Path Found", sum_reward)
             for i in range(0, len(path)):
-                print(env.get_state_from_id(path[i]))
+                print(path[i])
     
     plot_graph(avg_reward, "Reward", "reward_score")
         

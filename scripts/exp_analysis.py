@@ -23,26 +23,36 @@ if __name__ == '__main__':
 
     # Analysis for deadline
 
-    deadline = np.arange(0, 50)
+    deadline = np.arange(0, 100, 5)
     params = OmegaConf.load(config)
+    if params.env == "MetaWorld-v1":
+        agent_type = 1
+    else :
+        agent_type = 0
+
 
     deadline_data = []
     for i in range(len(deadline)):
         params['deadline'] = str(deadline[i])
         env = gym.make(params.env, params = params)
-        curr_state, _ = env.reset()
+        if agent_type == 1:
+            curr_state, info = env.reset()
+            curr_id = env.observation_space.get_state_id(curr_state)
+            
         if params.verbose == "True":
             while True:
                 action = 0
-                if params.env == "MetaWorld-v1":
-                    next_state, reward, _, done, info = env.step_mw(action, curr_state)
+                if agent_type == 1:
+                    next_state, next_id, reward, _, done, info  = env.step_mw(action, curr_state)
                     print(curr_state, reward, next_state)
                     curr_state = next_state
+                    curr_id = next_id
                 else :
-                    next_state, reward, _ , done, infor = env.step(action)
+                    next_state, reward, _, done, info  = env.step(action)
                     print(next_state, reward)
                 if done :
                     break
+
         reward = 0
         done = False
         agent = MCTSAgent(env, params)
@@ -53,20 +63,27 @@ if __name__ == '__main__':
         episode_reward = []
 
         for i in range(int(params.episodes)):
-            curr_state, _ = env.reset()
+            if agent_type == 1:
+                curr_state, info = env.reset()
+                curr_id = env.observation_space.get_state_id(curr_state)
+                curr = curr_id
+            else :
+                curr, info = env.reset()
+
             env._max_episode_steps = max_episode_steps
             sum_reward = 0
-            node = Node(False, 0, curr_state)
+            node = Node(False, 0, curr)
             all_nodes = []
             cp = int(params.cp)
             path = []
             while True:
                 action, node, cp = agent.run(params, node)
-                if params.env == "MetaWorld-v1":
-                    next_state, reward, _, done, info = env.step_mw(action, curr_state)
+                if agent_type == 1:
+                    next_state, next_id, reward, _, done, info  = env.step_mw(action, curr_state)
                     curr_state = next_state
+                    curr_id = next_id
                 else :
-                    next_state, reward, _, done, info = env.step(action)
+                    next_state, reward, _, done, info  = env.step(action)
                 sum_reward = sum_reward + reward
                 if done :
                     break

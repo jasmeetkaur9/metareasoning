@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from omegaconf import OmegaConf 
 
-from ppo.network import Policy
-from ppo.network import Value
-from ppo.network import Network
+from methods.ppo.network import Policy
+from methods.ppo.network import Value
+from methods.ppo.network import Network
 
 
 
@@ -255,7 +255,7 @@ def plot_graph(reward_history, avg_reward, loss):
     plt.ylabel("Reward", fontsize=12)
 
     plt.title("CartPole")
-    plt.savefig('score.png')
+    plt.savefig('plots/score.png')
 
 
 

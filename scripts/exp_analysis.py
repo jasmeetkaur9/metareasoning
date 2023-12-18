@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     # Analysis for deadline
 
-    deadline = np.arange(0, 100, 5)
+    deadline = np.arange(0, 100, 2)
     params = OmegaConf.load(config)
     if params.env == "MetaWorld-v1":
         agent_type = 1
@@ -89,4 +89,4 @@ if __name__ == '__main__':
                     break
             episode_reward.append(sum_reward)
         deadline_data.append(np.mean(np.array(episode_reward)))
-    plot_graph(deadline_data, "Deadline", "deadline_score" )
+    plot_graph(deadline_data, "Deadline", "deadline_score_1" )

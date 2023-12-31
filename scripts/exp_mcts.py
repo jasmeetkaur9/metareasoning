@@ -10,13 +10,13 @@ from omegaconf import OmegaConf
 
 from methods.mcts.mcts import MCTSAgent, Node
 from envs.metaenv import MetaWorldEnv
-from utils.utils import initialize, plot_graph
+from utils.utils import plot_graph
+import envs
 
 
 # TODO : Need to make it compatible with both envs
 
 if __name__ == '__main__':
-    initialize()
     parser = argparse.ArgumentParser()
     parser.add_argument("--config_file")
     args = parser.parse_args()

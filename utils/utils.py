@@ -2,7 +2,6 @@ import collections
 import time
 import random
 import gym
-from gym import spaces
 from envs.metaenv import MetaWorldEnv
 import pandas as pd
 import numpy as np
@@ -11,14 +10,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.io import write_image as sv
 
-
-def initialize():
-        # Register the environment
-        gym.register(
-            id='MetaWorld-v1',
-            entry_point='envs.metaenv:MetaWorldEnv',
-            kwargs={'params': None} 
-        )
 
 def plot_graph(data, label, title):
     x = np.array(range(len(data)))
@@ -31,6 +22,6 @@ def plot_graph(data, label, title):
     yaxis_title='Reward',
     yaxis=dict(scaleanchor="x", scaleratio=1),
     xaxis=dict(constrain='domain'),
-    width=700, height=500
+    width=1200, height=800
     )
     sv(fig, file = "plots/"+title+".png", format = 'png')

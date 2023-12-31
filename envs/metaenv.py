@@ -11,6 +11,7 @@ import random
 import operator
 import gym
 from gym import spaces
+from data.dists import Database
 
 
 DEBUG = False
@@ -18,19 +19,6 @@ random.seed(40)
 
 
 
-DEFAULT_PD = torch.tensor([[[0.02, 0.02369, 0.02369, 0.34308, 0.617268, 0.78782,0.9112, 0.95420, 0.977659, 0.98666, 1.0],
-                  [0.02, 0.02369, 0.02369, 0.34308, 0.617268, 0.78782,0.9112, 0.95420, 0.977659, 0.98666, 1.0]],
-                  [[0.02, 0.02369, 0.02369, 0.34308, 0.617268, 0.78782,0.9112, 0.95420, 0.977659, 1.0, 1.0],
-                  [0.02, 0.02369, 0.02369, 0.34308, 0.617268, 0.78782,0.9112, 0.95420, 0.977659, 1.0, 1.0]],
-                 [[0.106972,0.106972,0.278794,0.450616,0.5332514,0.5997631,0.6650907,0.7149744,0.764858,0.8081900,0.835903],
-                  [0.106972,0.106972,0.278794,0.450616,0.5332514,0.5997631,0.6650907,0.7149744,0.764858,0.8081900,0.835903]]])
-
-DEFAULT_ED = torch.tensor([[[0.001,0.001, 0.001,0.001, 0.56869, 0.832497, 1.00, 1.00],
-                  [0.001,0.001, 0.001,0.001, 0.56869, 0.932497, 1.00 ,1.00]],
-                  [[0.001,0.001, 0.001,0.001, 0.56869, 0.832497, 1.00, 1.00],
-                  [0.001,0.001, 0.001,0.001, 0.56869, 0.932497, 1.00 ,1.00]],
-                 [[0.001,0.001, 0.001,0.0330971, 0.001, 0.001, 0.001,0.001],
-                  [0.001,0.001, 0.001,0.0330971, 0.001, 0.001, 0.001,0.001]]])
 
 
 
@@ -68,8 +56,6 @@ def transform_input(planning_dist, exec_dist) :
     return planning_input, execution_input
 
 
-
-transform_input(DEFAULT_PD, DEFAULT_ED)
 
 MAX_STATES = 10000
 
@@ -140,8 +126,11 @@ class MetaWorldObservationSpace(gym.spaces.Space):
 
 class MetaWorldEnv(gym.Env):
 
-    def __init__(self, params, planning_dist = DEFAULT_PD, execution_dist = DEFAULT_ED):
+    def __init__(self, params):
         super(MetaWorldEnv, self).__init__()
+        self.data = int(params.data_id)
+        self.database = Database()
+        planning_dist, execution_dist = self.database.get_dist(self.data)
         self.planning_input, self.execution_input = transform_input(planning_dist, execution_dist)
         self.num_of_plans = int(params.num_symbolic_plans)
         self.actions_per_plan = int(params.num_actions_per_plan)

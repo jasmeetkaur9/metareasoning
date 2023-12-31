@@ -10,12 +10,13 @@ from omegaconf import OmegaConf
 
 from methods.mcts.mcts import MCTSAgent, Node
 from envs.metaenv import MetaWorldEnv
-from utils.utils import initialize, plot_graph
+from utils.utils import plot_graph
+from data.dists import Database
+import envs
 
 
 
 if __name__ == '__main__':
-    initialize()
     parser = argparse.ArgumentParser()
     parser.add_argument("--config_file")
     args = parser.parse_args()
@@ -89,4 +90,4 @@ if __name__ == '__main__':
                     break
             episode_reward.append(sum_reward)
         deadline_data.append(np.mean(np.array(episode_reward)))
-    plot_graph(deadline_data, "Deadline", "deadline_score_1" )
+    plot_graph(deadline_data, "Deadline", "deadline_score_exp1" )

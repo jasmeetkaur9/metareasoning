@@ -145,7 +145,7 @@ class Action:
         self.goal_n = None
         self.iteration = 0
         self.radius = 1
-        self.time_step = 5
+        self.time_step = 15
         self.start_time_total = time.time()
         self.informed = True
         self.itr = 0 

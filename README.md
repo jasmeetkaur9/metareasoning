@@ -8,5 +8,11 @@
 python scripts/exp_performance.py
 
 # Plots
-1. ![Performance with increasing deadline](plots/deadline_score_exp1.png)
-2. ![Deadline 30, Plans 3](plots/exp_11.png)
+<table>
+  <tr>
+    <td align="center"><img src="plots/deadline_score_exp1.png" alt="Alt text" style="display: block; margin: 0 auto;" title="Performance with increasing deadline" width="500" height="300"></td>
+    <td align="center"><img src="plots/exp_11.png" alt="Alt text" style="display: block; margin: 0 auto;" title="Deadline 30, Plans 3" width="400" height="300"></td>
+  </tr>
+</table>
+
+

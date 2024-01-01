@@ -21,15 +21,19 @@ if __name__ == '__main__':
     parser.add_argument("--config_file")
     args = parser.parse_args()
     config = args.config_file
+    
 
     # Analysis for deadline
 
-    deadline = np.arange(0, 100, 2)
+    deadline = np.arange(0, 200, 4)
     params = OmegaConf.load(config)
     if params.env == "MetaWorld-v1":
         agent_type = 1
     else :
         agent_type = 0
+    with open((os.path.join(params.logdir, 'exp_9_config.txt')), 'w') as f:
+        config_str = OmegaConf.to_yaml(params)
+        f.write(config_str)
 
 
     deadline_data = []
@@ -90,4 +94,4 @@ if __name__ == '__main__':
                     break
             episode_reward.append(sum_reward)
         deadline_data.append(np.mean(np.array(episode_reward)))
-    plot_graph(deadline_data, "Deadline", "deadline_score_exp1" )
+    plot_graph(deadline_data,"Deadline", "Reward", "Deadline", "exp_9" )

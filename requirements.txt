@@ -1,0 +1,9 @@
+
+gym==0.26.2
+kaleido==0.2.1
+matplotlib==3.7.0
+numpy==1.24.2
+omegaconf==2.3.0
+pandas==2.1.4
+plotly==5.18.0
+torch==2.0.1

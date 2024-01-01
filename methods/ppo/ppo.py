@@ -67,21 +67,38 @@ class Memory:
 class PPOAgent:
     def __init__(self, env, params):
         self.env = env
+        self.env_name = params.env
         params = dict(params)
         params.pop('env')
+        params.pop('logdir')
         for param, val in params.items():
             exec('self.' + param + '=' + str(val))
 
         self.action_size = self.env.action_space.n
-        self.policy_network = Policy(action_size = self.action_size, lr = self.learning_rate, k_epoch = self.k_epoch)
-        self.value_network = Value(action_size = self.action_size, lr = self.learning_rate, k_epoch = self.k_epoch)
-        self.network = Network(action_size = self.action_size, lr = self.learning_rate, k_epoch = self.k_epoch)
+        if (self.env_name == "MetaWorld-v1" or self.env_name == "PR2-v0"):
+            self.agent_type = 1
+            self.input_size = 5
+        else :
+            self.agent_type = 0
+            self.input_size = 4
+        self.policy_network = Policy(action_size = self.action_size, lr = self.learning_rate, k_epoch = self.k_epoch, input_size=self.input_size)
+        self.value_network = Value(action_size = self.action_size, lr = self.learning_rate, k_epoch = self.k_epoch, input_size=self.input_size)
+        self.network = Network(action_size = self.action_size, lr = self.learning_rate, k_epoch = self.k_epoch, input_size=self.input_size)
         self.memory = Memory(10)
+        
     
     def reset(self):
-        self.env.reset()
-        action = self.env.action_space.sample()
-        return self.env.step(action)
+        if self.agent_type == 1:
+            curr_state, info = self.env.reset()
+            curr_id = self.env.observation_space.get_state_id(curr_state)
+            curr = curr_id
+            action = self.env.action_space.sample()
+            obs, curr_id, reward, _, done, _ = self.env.step_mw(action, curr_state)
+        else :
+            self.env.reset()
+            action = self.env.action_space.sample()
+            obs, reward, _, done, _ = self.env.step(action)
+        return obs, reward, {}, done, {}
 
     def train(self):
         episode = 0
@@ -96,6 +113,7 @@ class PPOAgent:
             episode += 1
             episode_length = 0
             
+            
             obs, reward, _, done, _ = self.reset()
             curr_obs = obs
             total_episode_reward = 0
@@ -108,14 +126,22 @@ class PPOAgent:
     
                 action = torch.distributions.Categorical(prob_action).sample().item()
 
-                obs, reward, _, done, _ = self.env.step(action)
-                next_obs = obs
+
+                if self.agent_type == 1:
+                    obs, next_id, reward, _, done, info  = self.env.step_mw(action, curr_obs)
+                    next_obs = obs
+                    self.memory.add_memory(curr_obs, action, reward, next_obs, done, prob_action[action].item())
+                    curr_obs = next_obs
+                    curr_id = next_id
+                else :
+                    obs, reward, _, done, _ = self.env.step(action)
+                    next_obs = obs
+                    self.memory.add_memory(curr_obs, action, reward, next_obs, done, prob_action[action].item())
+                    curr_obs = next_obs
 
                 reward = -1 if done else reward
 
-                self.memory.add_memory(curr_obs, action, reward, next_obs, done, prob_action[action].item())
-
-                curr_obs = next_obs
+                
                 total_episode_reward += reward
 
                 if done :

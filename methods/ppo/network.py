@@ -5,7 +5,7 @@ import  torch.optim as optim
 
 
 class Policy(nn.Module):
-    def __init__(self, action_size, lr, k_epoch, input_size = 4):
+    def __init__(self, action_size, lr, k_epoch, input_size):
         super(Policy, self).__init__()
         self.action_size = action_size
         self.input_size = input_size

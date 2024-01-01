@@ -148,7 +148,6 @@ class MetaWorldEnv(gym.Env):
 
         self.action_space = spaces.Discrete(self.num_of_plans)
         self.observation_space = MetaWorldObservationSpace(self.num_of_plans)
-        self.reset()
 
     def reset(self):
         self.execution_time = np.zeros(self.num_of_plans)

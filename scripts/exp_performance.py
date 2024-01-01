@@ -13,6 +13,8 @@ from envs.metaenv import MetaWorldEnv
 from utils.utils import plot_graph
 import envs
 from methods.baselines.baseline import random_agent, rr_agent
+from envs.pr2 import PR2
+
 
 
 # TODO : Need to make it compatible with both envs
@@ -24,9 +26,15 @@ if __name__ == '__main__':
     config = args.config_file
 
     params = OmegaConf.load(config)
+    
     env = gym.make(params.env, params = params)
+    if params.env ==  "PR2-v0":
+        p = int(params.num_symbolic_plans)
+        c = int(params.num_actions_per_plan)
+        pr2 = PR2(p,c)
+        env.set_pybullet_ob(pr2)
     curr_state, _ = env.reset()
-    with open((os.path.join(params.logdir, 'exp_7_config.txt')), 'w') as f:
+    with open((os.path.join(params.logdir, 'exp_14.txt')), 'w') as f:
         config_str = OmegaConf.to_yaml(params)
         f.write(config_str)
 
@@ -47,7 +55,7 @@ if __name__ == '__main__':
     timestr = time.strftime("%Y-%m-%d")
     avg_reward = []
     episode_reward = []
-    if params.env == "MetaWorld-v1":
+    if params.env == "MetaWorld-v1" or params.env ==  "PR2-v0":
         agent_type = 1
     else :
         agent_type = 0
@@ -68,6 +76,7 @@ if __name__ == '__main__':
         while True:
             path.append(curr_state)
             action, node, cp = agent.run(params, node)
+            print(action)
             if agent_type == 1:
                 next_state, next_id, reward, _, done, info  = env.step_mw(action, curr_state)
                 curr_state = next_state
@@ -85,8 +94,14 @@ if __name__ == '__main__':
                 print(path[i])
 
     env = gym.make(params.env, params = params)
+    if params.env ==  "PR2-v0":
+        env.set_pybullet_ob(pr2)
+    curr_state, _ = env.reset()
     random_result = random_agent(env, episodes, agent_type)
     env = gym.make(params.env, params = params)
+    if params.env ==  "PR2-v0":
+        env.set_pybullet_ob(pr2)
+    curr_state, _ = env.reset()
     rr_result = rr_agent(env, episodes, agent_type, 1)
 
     # Plot results
@@ -95,6 +110,6 @@ if __name__ == '__main__':
     data.append(random_result)
     data.append(rr_result)
     data.append(avg_reward)
-    plot_graph(data, labels, "Episodes", "Reward", "exp_7", 1)
+    plot_graph(avg_reward, "MCTS", "Episodes", "Reward", "exp_14", 1)
 
         

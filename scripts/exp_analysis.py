@@ -94,4 +94,4 @@ if __name__ == '__main__':
                     break
             episode_reward.append(sum_reward)
         deadline_data.append(np.mean(np.array(episode_reward)))
-    plot_graph(deadline_data,"Deadline", "Reward", "Deadline", "exp_9" )
+    plot_graph(deadline_data,"Deadline", "Reward", "Deadline", "exp_9" ,0 )

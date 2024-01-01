@@ -36,7 +36,7 @@ class MCTSAgent :
         self.lookahead_target = int(params.lookahead_target)
         self.rollout_iterations = int(params.rollout_iterations)
         self.verbose = True if params.verbose == "True" else False
-        self.agent_type = 1 if params.env == "MetaWorld-v1" else 0
+        self.agent_type = 1 if params.env == "MetaWorld-v1" or params.env == "PR2-v0" else 0
 
     def run(self, params, node):
         if self.cp == None:
@@ -59,10 +59,14 @@ class MCTSAgent :
             ix += 1
             if ix > self.rollout_iterations:
                 break
+        
+        """
+        To change constant : 
         if max_depth < self.lookahead_target:
             self.cp = self.cp - 1
         else:
             self.cp = self.cp + 1
+        """
         
 
         if self.verbose :

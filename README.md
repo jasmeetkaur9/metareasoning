@@ -21,10 +21,10 @@
           PPO Agent</td>
   </tr>
   <tr>
-    <td align="center"><img src="plots/exp_11.png" alt="Alt text" style="display: block; margin: 0 auto;" title="Deadline 30, 3 symbolic plans" width="500" height="300">
-    Deadline 30, 3 symbolic plans</td>
-    <td align="center"><img src="plots/exp_15.png" alt="Alt text" style="display: block; margin: 0 auto;" title="Deadline 40, 2 symbolic plans" width="500" height="300">
+    <td align="center"><img src="plots/exp_11.png" alt="Alt text" style="display: block; margin: 0 auto;" title="Deadline 30, 2 symbolic plans" width="500" height="300">
     Deadline 30, 2 symbolic plans</td>
+    <td align="center"><img src="plots/exp_15.png" alt="Alt text" style="display: block; margin: 0 auto;" title="Deadline 40, 3 symbolic plans" width="500" height="300">
+    Deadline 30, 3 symbolic plans</td>
   </tr>
 </table>
 

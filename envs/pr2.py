@@ -278,9 +278,10 @@ class PR2:
         if res == 0:
             return 0, 'P', 0 
         elif res == 1:
-            # need to excute and get execution time 
+            # need to execute and get execution time 
             etime = 5
             speed = 1 
+            # TODO
             # start_point = base_path[0]
             # for i in range(1, len(base_path)):
             #     next_point = base_path[i]

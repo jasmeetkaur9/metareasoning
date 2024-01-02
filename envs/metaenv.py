@@ -212,7 +212,12 @@ class MetaWorldEnv(gym.Env):
 
         return curr_state, curr_id, reward, {}, done, {}
 
-    
+    """ Transition function
+        Arguments :
+            State Id, Action
+        Returns :
+            Next St, Probs
+    """
     def transition_function(self, st_id, action):
         state = self.observation_space.get_state_from_id(st_id)
         curr_st_id = st_id

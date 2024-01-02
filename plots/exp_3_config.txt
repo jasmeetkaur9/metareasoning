@@ -1,0 +1,14 @@
+env: MetaWorld-v1
+logdir: plots
+data_id: '1'
+num_symbolic_plans: '3'
+num_actions_per_plan: '2'
+deadline: '40'
+verbose: 'False'
+version1: 'False'
+seed: '40'
+episodes: '200'
+rollout_iterations: '100'
+lookahead_target: '100'
+max_episode_steps: '1500'
+cp: '10'

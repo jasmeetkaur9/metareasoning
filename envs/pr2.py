@@ -145,7 +145,7 @@ class Action:
         self.goal_n = None
         self.iteration = 0
         self.radius = 1
-        self.time_step = 15
+        self.time_step = 5
         self.start_time_total = time.time()
         self.informed = True
         self.itr = 0 
@@ -281,7 +281,7 @@ class PR2:
             # need to excute and get execution time 
             etime = 5
             speed = 1 
-            start_point = base_path[0]
+            # start_point = base_path[0]
             # for i in range(1, len(base_path)):
             #     next_point = base_path[i]
             #     distance = np.sqrt((next_point[1] - start_point[1]) ** 2 + (next_point[0] - start_point[0]) ** 2)

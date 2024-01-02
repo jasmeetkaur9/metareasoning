@@ -143,7 +143,7 @@ class PR2Env(MetaWorldEnv):
             exec_done = self.plan_executed(j)
             if curr_time > self.deadline:
                 return True
-            elif exec_done and pt_invested + exec_time  <= self.deadline and last_action_id == last_refined_action:
+            elif exec_done and curr_time + exec_time  <= self.deadline and last_action_id == last_refined_action:
                 return True
         
         return False
@@ -171,7 +171,7 @@ class PR2Env(MetaWorldEnv):
             exec_time = self.execution_time[j]
             last_action_id = self.actions_per_plan - 1
             exec_done = self.plan_executed(j)
-            if exec_done and pt_invested + exec_time  <= self.deadline and last_action_id == last_refined_action:
+            if exec_done and curr_time + exec_time  <= self.deadline and last_action_id == last_refined_action:
                 reward = reward + 100
         
         return reward

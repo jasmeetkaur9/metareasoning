@@ -11,6 +11,8 @@ from methods.ppo.network import Policy
 from methods.ppo.network import Value
 from methods.ppo.network import Network
 
+from utils.utils import plot_graph
+
 
 
 class Memory:
@@ -138,19 +140,17 @@ class PPOAgent:
                     next_obs = obs
                     self.memory.add_memory(curr_obs, action, reward, next_obs, done, prob_action[action].item())
                     curr_obs = next_obs
-
-                reward = -1 if done else reward
-
-                
-                total_episode_reward += reward
+                    reward = -1 if done else reward
+                    total_episode_reward += reward
 
                 if done :
                     episode_length = step - start_step
-                    reward_history.append(total_episode_reward)
-                    avg_reward.append(sum(reward_history[-100:])/100.0)
+                    reward_history.append(reward)
+                    #avg_reward.append(sum(reward_history[-100:])/100.0)
+                    avg_reward.append(sum(reward_history)/len(reward_history))
                     loss.append(float(self.network.loss))
 
-                    if len(reward_history) > 100 and sum(reward_history[-100:-1]) / 100 >= 195:
+                    if episode > 100 or (len(reward_history) > 100 and sum(reward_history[-100:-1]) / 100 >= 195):
                         solved = True
                     
                     self.env.reset()
@@ -165,7 +165,7 @@ class PPOAgent:
                     self.update_network()
             
             if episode % self.plot_every == 0:
-                plot_graph(reward_history, avg_reward, loss)
+                plot_graph(avg_reward, "", "Episodes", "Reward", "Navigation", 0)
 
 
 
@@ -266,22 +266,6 @@ class PPOAgent:
             self.memory['td_target'] = torch.cat((self.memory['td_target'], td_target.data), dim = 0)
         
         self.memory['advantage'] = self.memory['advantage'] + advantages
-
-
-def plot_graph(reward_history, avg_reward, loss):
-
-    df = pd.DataFrame({'x' : range(len(reward_history)), 'Reward' : reward_history, 'Average' : avg_reward, 'Loss' : loss})
-    plt.style.use('seaborn-darkgrid')
-    palette = plt.get_cmap('Set1')
-
-    plt.plot(df['x'], df['Average'], marker = "", color = palette(1), linewidth = 0.8, alpha = 0.9, label = 'Reward')
-    plt.plot(df['x'], df['Loss'], marker = "", color = palette(3), linewidth = 0.8, alpha = 0.9, label = 'Loss')
-
-    plt.xlabel("Episode", fontsize=12)
-    plt.ylabel("Reward", fontsize=12)
-
-    plt.title("CartPole")
-    plt.savefig('plots/score.png')
 
 
 
